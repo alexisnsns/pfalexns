@@ -408,7 +408,6 @@ const styles: Record<string, React.CSSProperties> = {
     fontWeight: 500,
     marginRight: 5,
   },
-
   footer: {
     // marginTop: "1.5rem",
     fontSize: "0.9rem",
