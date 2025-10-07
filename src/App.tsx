@@ -5,7 +5,7 @@ interface Project {
   readme?: string;
 }
 
-const GITHUB_USERNAME = "alexisnsns"; 
+const GITHUB_USERNAME = "alexisnsns";
 
 function App() {
   const [projects, setProjects] = useState<Project[]>([
@@ -15,14 +15,14 @@ function App() {
     { name: "pepebot" },
     { name: "sepoliafaucet" },
     { name: "zenLoop" },
-    // https://github.com/alexberthon/zenloop
+    // https://gitlab.com/dev_lucas/cross_arb
   ]);
-
 
   const fetchReadmeText = async (projectName: string): Promise<string> => {
     const urls = [
       `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${projectName}/main/README.md`,
       `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${projectName}/main/readme.md`,
+      `https://raw.githubusercontent.com/alexberthon/zenloop/master/README.md`,
     ];
 
     for (const url of urls) {
@@ -53,15 +53,17 @@ function App() {
 
   return (
     <div style={styles.container}>
-      <h1 style={styles.title}>Alex N</h1>
+      <h1 style={styles.title}>Alex N</h1>{" "}
+      <a href="mailto:hello@alexn.me" style={styles.link}>
+        (hello@alexn.me)
+      </a>
       <p style={styles.subtitle}>Full-stack dev · Mostly JS/TS and Web3</p>
-
       <p style={styles.text}>
-        I'm currently working as a full-stack developer for a Web3 company, and
-        I'm generally curious about all things crypto. Going bankless. Proud ETH
-        node operator.
+        Currently building <a href="https://x.com/getjoin_io">@getJoin</a>'s
+        institutional DeFi savings platform
       </p>
-
+      <p>Crafting free range, fair trade, organic software for DeFi teams.</p>
+      <p>Proud ETH node operator; going bankless.</p>
       <div style={styles.links}>
         <a
           href={`https://gitlab.com/${GITHUB_USERNAME}`}
@@ -70,7 +72,7 @@ function App() {
         >
           GitLab
         </a>
-        /
+        ·
         <a
           href={`https://github.com/${GITHUB_USERNAME}`}
           target="_blank"
@@ -78,25 +80,22 @@ function App() {
         >
           GitHub
         </a>
-        <a href="mailto:hello@alexn.me" style={styles.link}>
-          hello@alexn.me
-        </a>
+        ·
         <a
           href="/resumeAlexN.pdf"
           target="_blank"
           rel="noopener noreferrer"
           style={styles.link}
         >
-          📄 View Resume
+          Resume
         </a>
       </div>
-
+      <h2 style={{ marginTop: "3rem" }}>Day Work </h2>
       <p style={styles.text}>
         Some projects I've worked on: - Join Wallet (link) - Join B2B (link) -
         ApeWorx
       </p>
-
-      <h2 style={{ marginTop: "3rem" }}>Projects</h2>
+      <h2 style={{ marginTop: "3rem" }}>Night Work</h2>
       <div style={styles.projectList}>
         {projects.map((p) => (
           <div key={p.name} style={styles.projectCard}>
