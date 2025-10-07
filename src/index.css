@@ -8,3 +8,11 @@ body,
 a:hover {
   text-decoration: underline;
 }
+
+p {
+  line-height: 0.3;
+}
+
+h1 {
+  line-height: 1;
+}

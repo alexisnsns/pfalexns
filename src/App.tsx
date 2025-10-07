@@ -51,24 +51,60 @@ function App() {
     fetchAllReadmes();
   }, []);
 
+  const [copied, setCopied] = useState(false);
+  const email = "hello@alexn.me";
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(email);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1500); // reset after 1.5s
+  };
+
   return (
     <div style={styles.container}>
-      <h1 style={styles.title}>Alex N</h1>{" "}
-      <a href="mailto:hello@alexn.me" style={styles.link}>
-        (hello@alexn.me)
-      </a>
+      <h1 style={styles.title}>Alex N</h1>
+
       <p style={styles.subtitle}>Full-stack dev · Mostly JS/TS and Web3</p>
+
+      <hr
+        style={{
+          width: "60%",
+          border: "none",
+          borderTop: "1px solid #e2e8f0",
+        }}
+      />
+
       <p style={styles.text}>
-        Currently building <a href="https://x.com/getjoin_io">@getJoin</a>'s
-        institutional DeFi savings platform
+        Currently building{" "}
+        <a
+          style={styles.link}
+          href="https://x.com/getjoin_io"
+          onMouseEnter={(e) => (e.currentTarget.style.color = "#4b5563")}
+          onMouseLeave={(e) => (e.currentTarget.style.color = "#6b7280")}
+          target="_blank"
+        >
+          @getJoin
+        </a>
+        's institutional DeFi savings platform.
       </p>
       <p>Crafting free range, fair trade, organic software for DeFi teams.</p>
       <p>Proud ETH node operator; going bankless.</p>
       <div style={styles.links}>
         <a
+          style={styles.link}
+          onMouseEnter={(e) => (e.currentTarget.style.color = "#4b5563")}
+          onMouseLeave={(e) => (e.currentTarget.style.color = "#6b7280")}
+          onClick={handleCopy}
+        >
+          {copied ? "Copied to clipboard!" : email}
+        </a>
+        ·
+        <a
           href={`https://gitlab.com/${GITHUB_USERNAME}`}
           target="_blank"
           style={styles.link}
+          onMouseEnter={(e) => (e.currentTarget.style.color = "#4b5563")}
+          onMouseLeave={(e) => (e.currentTarget.style.color = "#6b7280")}
         >
           GitLab
         </a>
@@ -77,6 +113,8 @@ function App() {
           href={`https://github.com/${GITHUB_USERNAME}`}
           target="_blank"
           style={styles.link}
+          onMouseEnter={(e) => (e.currentTarget.style.color = "#4b5563")}
+          onMouseLeave={(e) => (e.currentTarget.style.color = "#6b7280")}
         >
           GitHub
         </a>
@@ -86,15 +124,48 @@ function App() {
           target="_blank"
           rel="noopener noreferrer"
           style={styles.link}
+          onMouseEnter={(e) => (e.currentTarget.style.color = "#4b5563")}
+          onMouseLeave={(e) => (e.currentTarget.style.color = "#6b7280")}
         >
           Resume
         </a>
       </div>
-      <h2 style={{ marginTop: "3rem" }}>Day Work </h2>
-      <p style={styles.text}>
-        Some projects I've worked on: - Join Wallet (link) - Join B2B (link) -
-        ApeWorx
+      <hr
+        style={{
+          width: "60%",
+          border: "none",
+          borderTop: "1px solid #e2e8f0",
+          marginTop: "1rem",
+        }}
+      />
+      <h2>Day Work </h2>
+      <p style={{ ...styles.text, marginBottom: 5 }}>
+        Selected professional experience:
       </p>
+      <ul style={{ ...styles.text, textAlign: "left", lineHeight: 1.5 }}>
+        <li>
+          <a href="https://getjoin.io/join-pro" style={styles.link}>
+            Join Pro
+          </a>
+          : Institutional DeFi savings & treasury platform
+        </li>
+        <li>
+          <a
+            href="https://apps.apple.com/us/app/join-wallet/id6590635145"
+            style={styles.link}
+          >
+            Join Wallet
+          </a>
+          : Self-custodial MPC crypto wallet (iOS/Android)
+        </li>
+        <li>
+          <a href="https://www.apeworx.io/" style={styles.link}>
+            ApeWorx
+          </a>
+          : Open-source smart contract dev toolkit
+        </li>
+      </ul>
+
       <h2 style={{ marginTop: "3rem" }}>Night Work</h2>
       <div style={styles.projectList}>
         {projects.map((p) => (
@@ -164,15 +235,13 @@ const styles: Record<string, React.CSSProperties> = {
   title: { fontSize: "2.5rem", marginBottom: "0.5rem" },
   subtitle: { fontSize: "1.2rem", opacity: 0.8 },
   text: { maxWidth: 600, textAlign: "center" },
-  links: { display: "flex", gap: "1.5rem", marginTop: "1.5rem" },
-  link: { color: "#2563eb", textDecoration: "none", fontWeight: 500 },
-  projectList: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "2rem",
-    marginTop: "2rem",
-    maxWidth: "800px",
-    width: "100%",
+  links: { display: "flex", gap: "1rem", marginTop: "1rem" },
+  link: {
+    color: "#6b7280",
+    textDecoration: "none",
+    fontWeight: 500,
+    transition: "color 0.2s",
+    cursor: "pointer",
   },
   projectCard: {
     border: "1px solid #e2e8f0",
