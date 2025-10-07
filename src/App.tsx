@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Copy, Check } from "lucide-react";
+import { Check } from "lucide-react";
 import { FaGithub } from "react-icons/fa";
 
 interface Project {
@@ -268,7 +268,7 @@ const styles: Record<string, React.CSSProperties> = {
     borderRadius: "8px",
     overflowX: "auto",
     whiteSpace: "pre-wrap",
-    padding: '8px',
+    padding: "8px",
   },
   repoLink: {
     display: "inline-flex",
