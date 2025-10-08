@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { FaGithub } from "react-icons/fa";
 import { FiCheck } from "react-icons/fi";
+import GoogleAnalytics from "./googleAnalytics";
 
 interface Project {
   name: string;
@@ -74,199 +75,206 @@ function App() {
   };
 
   return (
-    <div style={styles.container} className="container">
-      <h1 style={styles.title}>Alex N</h1>
+    <>
+      <GoogleAnalytics trackingId="G-78JRS5F43L" />
+      <div style={styles.container} className="container">
+        <h1 style={styles.title}>Alex N</h1>
 
-      <p style={styles.subtitle}>Full-stack dev · Mostly TS/JS and Web3</p>
+        <p style={styles.subtitle}>Full-stack dev · Mostly TS/JS and Web3</p>
 
-      <hr
-        style={{
-          width: "60%",
-          border: "none",
-          borderTop: "1px solid #e2e8f0",
-        }}
-      />
-
-      <p style={styles.text}>
-        Currently building{" "}
-        <a
-          style={styles.link}
-          href="https://x.com/getjoin_io"
-          onMouseEnter={(e) => (e.currentTarget.style.color = "#4b5563")}
-          onMouseLeave={(e) => (e.currentTarget.style.color = "#6b7280")}
-          target="_blank"
-        >
-          @getJoin
-        </a>
-        's institutional DeFi savings platform.
-      </p>
-      <p style={styles.text}>
-        Crafting free range, fair trade, organic software for DeFi teams.
-      </p>
-      <p style={styles.text}>Proud ETH node operator; going bankless.</p>
-      <div style={styles.links}>
-        <div
-          className="link-group"
+        <hr
           style={{
-            display: "flex",
-            flexWrap: "wrap",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: "8px",
-            textAlign: "center",
+            width: "60%",
+            border: "none",
+            borderTop: "1px solid #e2e8f0",
           }}
-        >
-          <a
-            style={{
-              ...styles.link,
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "6px",
-              cursor: "pointer",
-            }}
-            onMouseEnter={(e) => (e.currentTarget.style.color = "#4b5563")}
-            onMouseLeave={(e) => (e.currentTarget.style.color = "#6b7280")}
-            onClick={handleCopy}
-          >
-            {copied ? (
-              <>
-                <FiCheck size={16} strokeWidth={2} />
-                Copied!
-              </>
-            ) : (
-              <>
-                {/* 📋 Copy Icon */}
-                {email}
-              </>
-            )}
-          </a>
-          ·
-          <a
-            href={`https://gitlab.com/${GITHUB_USERNAME}`}
-            target="_blank"
-            style={styles.link}
-            onMouseEnter={(e) => (e.currentTarget.style.color = "#4b5563")}
-            onMouseLeave={(e) => (e.currentTarget.style.color = "#6b7280")}
-          >
-            GitLab
-          </a>
-          ·
-          <a
-            href={`https://github.com/${GITHUB_USERNAME}`}
-            target="_blank"
-            style={styles.link}
-            onMouseEnter={(e) => (e.currentTarget.style.color = "#4b5563")}
-            onMouseLeave={(e) => (e.currentTarget.style.color = "#6b7280")}
-          >
-            GitHub
-          </a>
-          ·
-          <a
-            href="/resumeAlexN.pdf"
-            target="_blank"
-            rel="noopener noreferrer"
-            style={styles.link}
-            onMouseEnter={(e) => (e.currentTarget.style.color = "#4b5563")}
-            onMouseLeave={(e) => (e.currentTarget.style.color = "#6b7280")}
-          >
-            Resume
-          </a>
-        </div>
-      </div>
-      <hr
-        style={{
-          width: "60%",
-          border: "none",
-          borderTop: "1px solid #e2e8f0",
-          marginTop: "1rem",
-        }}
-      />
-      <h2>Day Work </h2>
-      <p style={{ ...styles.text, marginBottom: 5 }}>
-        Selected professional experience:
-      </p>
-      <ul style={{ ...styles.text, textAlign: "left", lineHeight: 1.5 }}>
-        <li>
-          <a href="https://getjoin.io/join-pro" style={styles.link}>
-            Join Pro
-          </a>
-          : Institutional DeFi savings & treasury platform
-        </li>
-        <li>
-          <a
-            href="https://apps.apple.com/us/app/join-wallet/id6590635145"
-            style={styles.link}
-          >
-            Join Wallet
-          </a>
-          : Self-custodial MPC crypto wallet (iOS/Android)
-        </li>
-        <li>
-          <a href="https://www.apeworx.io/" style={styles.link}>
-            ApeWorx
-          </a>
-          : Open-source smart contract dev toolkit
-        </li>
-      </ul>
+        />
 
-      <h2 style={{ marginTop: "" }}>Night Work</h2>
-      <div style={styles.projectGrid} className="project-grid">
-        {projects.map((p) => (
-          <div key={p.name} style={styles.projectCard} className="project-card">
-            <h3>
-              {" "}
-              <a
-                href={`https://github.com/${GITHUB_USERNAME}/${p.name}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={styles.repoLink}
-              >
-                <FaGithub size={16} strokeWidth={2} />
-              </a>
-              {p.displayName}
-            </h3>
-            <pre style={styles.readme}>
-              {p.readme ? p.readme.slice(0, 600) + "..." : "No Readme found."}
-            </pre>
-            <p> {p.comments}</p>
-          </div>
-        ))}
-      </div>
-
-      <hr
-        style={{
-          width: "60%",
-          border: "none",
-          borderTop: "1px solid #e2e8f0",
-          marginTop: "1rem",
-        }}
-      />
-      <h2 style={{ marginTop: "" }}>Things I'm exploring</h2>
-      <ul style={{ ...styles.text, textAlign: "left", lineHeight: 1.5 }}>
-        <li style={{ marginBottom: "1rem" }}>
-          Arbitrage bot: I had a small CEX/DEX arbitrage bot running while the
-          FTX API was still active. I had to sunset it when FTX went down. I'm
-          curious to launch it again, this time maybe arbitraging cross-chain
-          price differences, or wrapped tokens opportunities (such as
-          doge/cbDoge). Started playing with Paraswap SDK to log price
-          differences.
-        </li>
-        <li>Non-USD stablecoins and decentralized stablecoins</li>
-      </ul>
-      <footer style={styles.footer}>
-        <p>
-          Feel free to re-use this basic Vite/TSX template for your own needs
+        <p style={styles.text}>
+          Currently building{" "}
           <a
-            href={`https://github.com/${GITHUB_USERNAME}/pfalexns`}
+            style={styles.link}
+            href="https://x.com/getjoin_io"
+            onMouseEnter={(e) => (e.currentTarget.style.color = "#4b5563")}
+            onMouseLeave={(e) => (e.currentTarget.style.color = "#6b7280")}
             target="_blank"
-            rel="noopener noreferrer"
-            style={styles.repoLink}
           >
-            <FaGithub size={16} strokeWidth={2} style={{ marginLeft: 4 }} />
+            @getJoin
           </a>
+          's institutional DeFi savings platform.
         </p>
-      </footer>
-    </div>
+        <p style={styles.text}>
+          Crafting free range, fair trade, organic software for DeFi teams.
+        </p>
+        <p style={styles.text}>Proud ETH node operator; going bankless.</p>
+        <div style={styles.links}>
+          <div
+            className="link-group"
+            style={{
+              display: "flex",
+              flexWrap: "wrap",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "8px",
+              textAlign: "center",
+            }}
+          >
+            <a
+              style={{
+                ...styles.link,
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "6px",
+                cursor: "pointer",
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.color = "#4b5563")}
+              onMouseLeave={(e) => (e.currentTarget.style.color = "#6b7280")}
+              onClick={handleCopy}
+            >
+              {copied ? (
+                <>
+                  <FiCheck size={16} strokeWidth={2} />
+                  Copied!
+                </>
+              ) : (
+                <>
+                  {/* 📋 Copy Icon */}
+                  {email}
+                </>
+              )}
+            </a>
+            ·
+            <a
+              href={`https://gitlab.com/${GITHUB_USERNAME}`}
+              target="_blank"
+              style={styles.link}
+              onMouseEnter={(e) => (e.currentTarget.style.color = "#4b5563")}
+              onMouseLeave={(e) => (e.currentTarget.style.color = "#6b7280")}
+            >
+              GitLab
+            </a>
+            ·
+            <a
+              href={`https://github.com/${GITHUB_USERNAME}`}
+              target="_blank"
+              style={styles.link}
+              onMouseEnter={(e) => (e.currentTarget.style.color = "#4b5563")}
+              onMouseLeave={(e) => (e.currentTarget.style.color = "#6b7280")}
+            >
+              GitHub
+            </a>
+            ·
+            <a
+              href="/resumeAlexN.pdf"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={styles.link}
+              onMouseEnter={(e) => (e.currentTarget.style.color = "#4b5563")}
+              onMouseLeave={(e) => (e.currentTarget.style.color = "#6b7280")}
+            >
+              Resume
+            </a>
+          </div>
+        </div>
+        <hr
+          style={{
+            width: "60%",
+            border: "none",
+            borderTop: "1px solid #e2e8f0",
+            marginTop: "1rem",
+          }}
+        />
+        <h2>Day Work </h2>
+        <p style={{ ...styles.text, marginBottom: 5 }}>
+          Selected professional experience:
+        </p>
+        <ul style={{ ...styles.text, textAlign: "left", lineHeight: 1.5 }}>
+          <li>
+            <a href="https://getjoin.io/join-pro" style={styles.link}>
+              Join Pro
+            </a>
+            : Institutional DeFi savings & treasury platform
+          </li>
+          <li>
+            <a
+              href="https://apps.apple.com/us/app/join-wallet/id6590635145"
+              style={styles.link}
+            >
+              Join Wallet
+            </a>
+            : Self-custodial MPC crypto wallet (iOS/Android)
+          </li>
+          <li>
+            <a href="https://www.apeworx.io/" style={styles.link}>
+              ApeWorx
+            </a>
+            : Open-source smart contract dev toolkit
+          </li>
+        </ul>
+
+        <h2 style={{ marginTop: "" }}>Night Work</h2>
+        <div style={styles.projectGrid} className="project-grid">
+          {projects.map((p) => (
+            <div
+              key={p.name}
+              style={styles.projectCard}
+              className="project-card"
+            >
+              <h3>
+                {" "}
+                <a
+                  href={`https://github.com/${GITHUB_USERNAME}/${p.name}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={styles.repoLink}
+                >
+                  <FaGithub size={16} strokeWidth={2} />
+                </a>
+                {p.displayName}
+              </h3>
+              <pre style={styles.readme}>
+                {p.readme ? p.readme.slice(0, 600) + "..." : "No Readme found."}
+              </pre>
+              <p> {p.comments}</p>
+            </div>
+          ))}
+        </div>
+
+        <hr
+          style={{
+            width: "60%",
+            border: "none",
+            borderTop: "1px solid #e2e8f0",
+            marginTop: "1rem",
+          }}
+        />
+        <h2 style={{ marginTop: "" }}>Things I'm exploring</h2>
+        <ul style={{ ...styles.text, textAlign: "left", lineHeight: 1.5 }}>
+          <li style={{ marginBottom: "1rem" }}>
+            Arbitrage bot: I had a small CEX/DEX arbitrage bot running while the
+            FTX API was still active. I had to sunset it when FTX went down. I'm
+            curious to launch it again, this time maybe arbitraging cross-chain
+            price differences, or wrapped tokens opportunities (such as
+            doge/cbDoge). Started playing with Paraswap SDK to log price
+            differences.
+          </li>
+          <li>Non-USD stablecoins and decentralized stablecoins</li>
+        </ul>
+        <footer style={styles.footer}>
+          <p>
+            Feel free to re-use this basic Vite/TSX template for your own needs
+            <a
+              href={`https://github.com/${GITHUB_USERNAME}/pfalexns`}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={styles.repoLink}
+            >
+              <FaGithub size={16} strokeWidth={2} style={{ marginLeft: 4 }} />
+            </a>
+          </p>
+        </footer>
+      </div>
+    </>
   );
 }
 
