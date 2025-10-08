@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { Check } from "lucide-react";
 import { FaGithub } from "react-icons/fa";
+import { FiCheck } from "react-icons/fi";
 
 interface Project {
   name: string;
@@ -130,7 +130,7 @@ function App() {
           >
             {copied ? (
               <>
-                <Check size={16} strokeWidth={2} />
+                <FiCheck size={16} strokeWidth={2} />
                 Copied!
               </>
             ) : (
