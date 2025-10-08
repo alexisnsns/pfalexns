@@ -16,3 +16,24 @@ p {
 h1 {
   line-height: 1;
 }
+
+@media (max-width: 768px) {
+  .project-card {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    padding: 0 !important;
+    border-left: none !important;
+    border-right: none !important;
+    width: 100% !important;
+  }
+  .container {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+}
+
+@media (max-width: 500px) {
+  .container {
+    padding: 0 !important;
+  }
+}

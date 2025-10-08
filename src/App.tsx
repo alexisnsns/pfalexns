@@ -74,14 +74,14 @@ function App() {
   };
 
   return (
-    <div style={styles.container}>
+    <div style={styles.container} className="container">
       <h1 style={styles.title}>Alex N</h1>
 
       <p style={styles.subtitle}>Full-stack dev · Mostly TS/JS and Web3</p>
 
       <hr
         style={{
-          width: "900px",
+          width: "60%",
           border: "none",
           borderTop: "1px solid #e2e8f0",
         }}
@@ -105,20 +105,6 @@ function App() {
       </p>
       <p style={styles.text}>Proud ETH node operator; going bankless.</p>
       <div style={styles.links}>
-        <style>
-          {`
-      @media (max-width: 600px) {
-        .link-group {
-          flex-direction: column;
-          align-items: center;
-          gap: 8px;
-        }
-        .link-group span.dot {
-          display: none;
-        }
-      }
-    `}
-        </style>
         <div
           className="link-group"
           style={{
@@ -189,7 +175,7 @@ function App() {
       </div>
       <hr
         style={{
-          width: "900px",
+          width: "60%",
           border: "none",
           borderTop: "1px solid #e2e8f0",
           marginTop: "1rem",
@@ -224,9 +210,9 @@ function App() {
       </ul>
 
       <h2 style={{ marginTop: "" }}>Night Work</h2>
-      <div style={styles.projectGrid}>
+      <div style={styles.projectGrid} className="project-grid">
         {projects.map((p) => (
-          <div key={p.name} style={styles.projectCard}>
+          <div key={p.name} style={styles.projectCard} className="project-card">
             <h3>
               {" "}
               <a
