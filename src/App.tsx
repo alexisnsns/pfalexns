@@ -77,7 +77,7 @@ function App() {
     <div style={styles.container}>
       <h1 style={styles.title}>Alex N</h1>
 
-      <p style={styles.subtitle}>Full-stack dev · Mostly JS/TS and Web3</p>
+      <p style={styles.subtitle}>Full-stack dev · Mostly TS/JS and Web3</p>
 
       <hr
         style={{
@@ -100,64 +100,92 @@ function App() {
         </a>
         's institutional DeFi savings platform.
       </p>
-      <p>Crafting free range, fair trade, organic software for DeFi teams.</p>
-      <p>Proud ETH node operator; going bankless.</p>
+      <p style={styles.text}>
+        Crafting free range, fair trade, organic software for DeFi teams.
+      </p>
+      <p style={styles.text}>Proud ETH node operator; going bankless.</p>
       <div style={styles.links}>
-        <a
+        <style>
+          {`
+      @media (max-width: 600px) {
+        .link-group {
+          flex-direction: column;
+          align-items: center;
+          gap: 8px;
+        }
+        .link-group span.dot {
+          display: none;
+        }
+      }
+    `}
+        </style>
+        <div
+          className="link-group"
           style={{
-            ...styles.link,
-            display: "inline-flex",
+            display: "flex",
+            flexWrap: "wrap",
             alignItems: "center",
-            gap: "6px",
-            cursor: "pointer",
+            justifyContent: "center",
+            gap: "8px",
+            textAlign: "center",
           }}
-          onMouseEnter={(e) => (e.currentTarget.style.color = "#4b5563")}
-          onMouseLeave={(e) => (e.currentTarget.style.color = "#6b7280")}
-          onClick={handleCopy}
         >
-          {copied ? (
-            <>
-              <Check size={16} strokeWidth={2} />
-              Copied!
-            </>
-          ) : (
-            <>
-              {/* 📋 Copy Icon */}
-              {email}
-            </>
-          )}
-        </a>
-        ·
-        <a
-          href={`https://gitlab.com/${GITHUB_USERNAME}`}
-          target="_blank"
-          style={styles.link}
-          onMouseEnter={(e) => (e.currentTarget.style.color = "#4b5563")}
-          onMouseLeave={(e) => (e.currentTarget.style.color = "#6b7280")}
-        >
-          GitLab
-        </a>
-        ·
-        <a
-          href={`https://github.com/${GITHUB_USERNAME}`}
-          target="_blank"
-          style={styles.link}
-          onMouseEnter={(e) => (e.currentTarget.style.color = "#4b5563")}
-          onMouseLeave={(e) => (e.currentTarget.style.color = "#6b7280")}
-        >
-          GitHub
-        </a>
-        ·
-        <a
-          href="/resumeAlexN.pdf"
-          target="_blank"
-          rel="noopener noreferrer"
-          style={styles.link}
-          onMouseEnter={(e) => (e.currentTarget.style.color = "#4b5563")}
-          onMouseLeave={(e) => (e.currentTarget.style.color = "#6b7280")}
-        >
-          Resume
-        </a>
+          <a
+            style={{
+              ...styles.link,
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "6px",
+              cursor: "pointer",
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.color = "#4b5563")}
+            onMouseLeave={(e) => (e.currentTarget.style.color = "#6b7280")}
+            onClick={handleCopy}
+          >
+            {copied ? (
+              <>
+                <Check size={16} strokeWidth={2} />
+                Copied!
+              </>
+            ) : (
+              <>
+                {/* 📋 Copy Icon */}
+                {email}
+              </>
+            )}
+          </a>
+          ·
+          <a
+            href={`https://gitlab.com/${GITHUB_USERNAME}`}
+            target="_blank"
+            style={styles.link}
+            onMouseEnter={(e) => (e.currentTarget.style.color = "#4b5563")}
+            onMouseLeave={(e) => (e.currentTarget.style.color = "#6b7280")}
+          >
+            GitLab
+          </a>
+          ·
+          <a
+            href={`https://github.com/${GITHUB_USERNAME}`}
+            target="_blank"
+            style={styles.link}
+            onMouseEnter={(e) => (e.currentTarget.style.color = "#4b5563")}
+            onMouseLeave={(e) => (e.currentTarget.style.color = "#6b7280")}
+          >
+            GitHub
+          </a>
+          ·
+          <a
+            href="/resumeAlexN.pdf"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={styles.link}
+            onMouseEnter={(e) => (e.currentTarget.style.color = "#4b5563")}
+            onMouseLeave={(e) => (e.currentTarget.style.color = "#6b7280")}
+          >
+            Resume
+          </a>
+        </div>
       </div>
       <hr
         style={{
@@ -247,7 +275,7 @@ const styles: Record<string, React.CSSProperties> = {
     padding: "2rem",
   },
   title: { fontSize: "2.5rem", marginBottom: "0.5rem" },
-  subtitle: { fontSize: "1.2rem", opacity: 0.8 },
+  subtitle: { fontSize: "1.2rem", opacity: 0.8, textAlign: "center" },
   text: { maxWidth: 600, textAlign: "center" },
   links: { display: "flex", gap: "1rem", marginTop: "1rem" },
   link: {
