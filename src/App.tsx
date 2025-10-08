@@ -232,6 +232,27 @@ function App() {
           </div>
         ))}
       </div>
+
+      <hr
+        style={{
+          width: "60%",
+          border: "none",
+          borderTop: "1px solid #e2e8f0",
+          marginTop: "1rem",
+        }}
+      />
+      <h2 style={{ marginTop: "" }}>Things I'm exploring</h2>
+      <ul style={{ ...styles.text, textAlign: "left", lineHeight: 1.5 }}>
+        <li style={{ marginBottom: "1rem" }}>
+          Arbitrage bot: I had a small CEX/DEX arbitrage bot running while the
+          FTX API was still active. I had to sunset it when FTX went down. I'm
+          curious to launch it again, this time maybe arbitraging cross-chain
+          price differences, or wrapped tokens opportunities (such as
+          doge/cbDoge). Started playing with Paraswap SDK to log price
+          differences.
+        </li>
+        <li>Non-USD stablecoins and decentralized stablecoins</li>
+      </ul>
       <footer style={styles.footer}>
         <p>
           Feel free to re-use this basic Vite/TSX template for your own needs

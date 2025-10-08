@@ -9,12 +9,12 @@ a:hover {
   text-decoration: underline;
 }
 
-p {
-  /* line-height: 0.3; */
-}
-
 h1 {
   line-height: 1;
+}
+
+h2 {
+  text-align: center;
 }
 
 @media (max-width: 768px) {
