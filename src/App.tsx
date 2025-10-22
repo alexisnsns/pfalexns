@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { FaGithub, FaGlobe } from "react-icons/fa";
+import { FaGithub } from "react-icons/fa";
 import { FiCheck } from "react-icons/fi";
 import GoogleAnalytics from "./googleAnalytics";
 
