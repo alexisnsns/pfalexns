@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { FaGithub } from "react-icons/fa";
+import { FaGithub, FaGlobe } from "react-icons/fa";
 import { FiCheck } from "react-icons/fi";
 import GoogleAnalytics from "./googleAnalytics";
 
@@ -8,17 +8,38 @@ interface Project {
   readme?: string | null;
   comments?: string;
   displayName?: string;
+  link?: string;
 }
 
 const GITHUB_USERNAME = "alexisnsns";
 
 function App() {
   const [projects, setProjects] = useState<Project[]>([
-    { name: "defiPendulum", comments: "", displayName: "DeFi Pendulum" },
-    { name: "russianrouleth", comments: "", displayName: "Russian Rouleth" },
+    {
+      name: "sepoliafaucet",
+      comments: "",
+      displayName: "Sepolia Faucet",
+      link: "https://sepoliafaucet.vercel.app/",
+    },
+    {
+      name: "defiPendulum",
+      comments: "",
+      displayName: "DeFi Pendulum",
+      link: "https://x.com/defiautopilot",
+    },
+    {
+      name: "russianrouleth",
+      comments: "",
+      displayName: "Russian Rouleth",
+      link: "https://www.russianrouleth.xyz/",
+    },
     { name: "scrapernews", comments: "", displayName: "News Scraper" },
-    { name: "pepebot", comments: "", displayName: "Pepe Twitter Bot" },
-    { name: "sepoliafaucet", comments: "", displayName: "Sepolia Faucet" },
+    {
+      name: "pepebot",
+      comments: "",
+      displayName: "Pepe Twitter Bot",
+      link: "https://x.com/pepeappreciator",
+    },
     { name: "zenLoop", comments: "", displayName: "ZenLoop" },
     // https://gitlab.com/dev_lucas/cross_arb
   ]);
@@ -221,16 +242,31 @@ function App() {
               className="project-card"
             >
               <h3>
-                {" "}
+                {p.displayName}
                 <a
                   href={`https://github.com/${GITHUB_USERNAME}/${p.name}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  style={styles.repoLink}
+                  style={{
+                    ...styles.repoLink,
+                    marginLeft: 8, // small spacing between icons
+                  }}
                 >
                   <FaGithub size={16} strokeWidth={2} />
                 </a>
-                {p.displayName}
+                {p.link && (
+                  <a
+                    href={p.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      ...styles.repoLink,
+                      marginLeft: 4, // small spacing between icons
+                    }}
+                  >
+                    (launch ↗)
+                  </a>
+                )}
               </h3>
               <pre style={styles.readme}>
                 {p.readme ? p.readme.slice(0, 600) + "..." : "No Readme found."}
