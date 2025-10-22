@@ -1,0 +1,78 @@
+.ideas-container {
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+  font-family: sans-serif;
+}
+
+.ideas-title {
+  font-size: 2rem;
+  margin-bottom: 1.5rem;
+}
+
+.ideas-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.user-info {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.user-info button {
+  padding: 0.2rem 0.5rem;
+  border: 1px solid black;
+  background: none;
+  cursor: pointer;
+}
+
+.links a {
+  margin-left: 1rem;
+  text-decoration: none;
+}
+
+.posts-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.post-item {
+  border: 1px solid black;
+  padding: 1rem;
+  border-radius: 4px;
+  text-align: left;
+}
+
+.edit-input,
+.edit-textarea {
+  width: 100%;
+  margin-bottom: 0.5rem;
+  padding: 0.5rem;
+  border: 1px solid black;
+}
+
+.edit-buttons {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
+.post-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+  justify-content: flex-end;
+}
+
+.post-actions button {
+  padding: 0.3rem 0.6rem;
+  border: 1px solid black;
+  background: none;
+  cursor: pointer;
+}

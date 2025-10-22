@@ -102,7 +102,6 @@ function App() {
         <h1 style={styles.title}>Alex N</h1>
 
         <p style={styles.subtitle}>Full-stack dev · Mostly TS/JS and Web3</p>
-
         <hr
           style={{
             width: "60%",
