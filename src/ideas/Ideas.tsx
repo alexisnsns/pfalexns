@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabaseClient";
 import "./Ideas.css";
 import type { User } from "@supabase/supabase-js";
+import ReactMarkdown from "react-markdown";
 
 type Post = {
   id: number;
@@ -180,10 +181,12 @@ export default function Ideas() {
                   {post.title}{" "}
                   {post.draft && <span className="draft-tag">[Draft]</span>}
                 </h2>
-                <p className="post-content">{post.content}</p>
+                <p className="post-content">
+                  {" "}
+                  <ReactMarkdown>{post.content}</ReactMarkdown>
+                </p>
                 <p className="post-date">
                   {new Date(post.created_at).toLocaleDateString()}{" "}
-                  {new Date(post.created_at).toLocaleTimeString()}
                 </p>
                 {user && (
                   <div className="post-actions">

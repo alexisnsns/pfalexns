@@ -49,6 +49,10 @@
   text-align: left;
 }
 
+.post-date {
+  font-size: 0.8rem;
+}
+
 .edit-input,
 .edit-textarea {
   width: 100%;

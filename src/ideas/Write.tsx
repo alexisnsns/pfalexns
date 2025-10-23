@@ -83,7 +83,13 @@ export default function Write() {
           required
         />
         <textarea
-          placeholder="Content"
+          placeholder="Bold: **bold**
+
+Italic: *italic*
+
+Links: [text](url)
+
+Lists: - item"
           value={content}
           onChange={(e) => setContent(e.target.value)}
           rows={8}
