@@ -3,6 +3,7 @@ import { supabase } from "../../lib/supabaseClient";
 import "./Ideas.css";
 import type { User } from "@supabase/supabase-js";
 import ReactMarkdown from "react-markdown";
+import MDEditor from "@uiw/react-md-editor";
 
 type Post = {
   id: number;
@@ -34,15 +35,10 @@ export default function Ideas() {
   // --- Fetch posts
   useEffect(() => {
     async function fetchPosts() {
-      let query = supabase
+      const query = supabase
         .from("posts")
         .select("*")
         .order("created_at", { ascending: false });
-
-      // If user is not logged in, only fetch published posts
-      if (!user) {
-        query = query.eq("draft", false);
-      }
 
       const { data, error } = await query;
 
@@ -56,9 +52,8 @@ export default function Ideas() {
     }
 
     fetchPosts();
-  }, [user]); // re-fetch when user logs in/out
+  }, [user]);
 
-  // --- Delete post
   // --- Delete post
   async function handleDelete(postId: number) {
     if (!user) return alert("You must be logged in to delete posts.");
@@ -94,7 +89,7 @@ export default function Ideas() {
       .update({
         title: editTitle,
         content: editContent,
-        draft: draftValue, // <-- use the passed value
+        draft: draftValue,
       })
       .eq("id", postId);
 
@@ -156,20 +151,28 @@ export default function Ideas() {
                   onChange={(e) => setEditTitle(e.target.value)}
                   className="edit-input"
                 />
-                <textarea
-                  value={editContent}
-                  onChange={(e) => setEditContent(e.target.value)}
-                  className="edit-textarea"
-                />
+
+                {/* Rich Markdown editor */}
+                <div className="md-editor">
+                  <MDEditor
+                    data-color-mode="light"
+                    value={editContent}
+                    onChange={(val) => setEditContent(val ?? "")} // 👈 coerce undefined to empty string                    height={300}
+                    textareaProps={{
+                      placeholder: `Edit your post in Markdown...
+**Bold** 
+*Italic* 
+[Link](url)
+- List item`,
+                    }}
+                  />
+                </div>
+
                 <div className="edit-buttons">
-                  <button
-                    onClick={() => saveEdit(post.id, false)} // Publish
-                  >
-                    Public Publish
+                  <button onClick={() => saveEdit(post.id, false)}>
+                    Publish
                   </button>
-                  <button
-                    onClick={() => saveEdit(post.id, true)} // Save Draft
-                  >
+                  <button onClick={() => saveEdit(post.id, true)}>
                     Save Draft
                   </button>
                   <button onClick={cancelEdit}>Cancel</button>
@@ -181,13 +184,15 @@ export default function Ideas() {
                   {post.title}{" "}
                   {post.draft && <span className="draft-tag">[Draft]</span>}
                 </h2>
-                <p className="post-content">
-                  {" "}
+
+                <div className="post-content markdown-body">
                   <ReactMarkdown>{post.content}</ReactMarkdown>
-                </p>
+                </div>
+
                 <p className="post-date">
-                  {new Date(post.created_at).toLocaleDateString()}{" "}
+                  {new Date(post.created_at).toLocaleDateString()}
                 </p>
+
                 {user && (
                   <div className="post-actions">
                     <button onClick={() => startEdit(post)}>Edit</button>

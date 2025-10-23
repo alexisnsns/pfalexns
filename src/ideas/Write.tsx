@@ -4,12 +4,13 @@ import Login from "./Login";
 import "./Ideas.css";
 import { useNavigate } from "react-router-dom";
 import type { User } from "@supabase/supabase-js";
+import MDEditor from "@uiw/react-md-editor";
 
 export default function Write() {
   const navigate = useNavigate();
 
   const [title, setTitle] = useState("");
-  const [content, setContent] = useState("");
+  const [content, setContent] = useState(""); // Markdown content
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [user, setUser] = useState<User | null>(null);
@@ -37,7 +38,7 @@ export default function Write() {
 
     const { error } = await supabase
       .from("posts")
-      .insert([{ title, content, draft }]); // 👈 explicitly insert draft
+      .insert([{ title, content, draft }]); // explicitly insert draft
 
     if (error) {
       console.error(error);
@@ -82,27 +83,29 @@ export default function Write() {
           className="edit-input"
           required
         />
-        <textarea
-          placeholder="Bold: **bold**
 
-Italic: *italic*
-
-Links: [text](url)
-
-Lists: - item"
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-          rows={8}
-          className="edit-textarea"
-          required
-        />
+        {/* Replace textarea with MDEditor */}
+        <div className="md-editor">
+          <MDEditor
+            data-color-mode="light"
+            value={content}
+            onChange={(val) => setContent(val ?? "")} // 👈 coerce undefined to empty string            height={400}
+            textareaProps={{
+              placeholder: `Write your post in Markdown...
+**Bold** 
+*Italic* 
+[Link](url)
+- List item`,
+            }}
+          />
+        </div>
 
         <div className="button-group">
           <button
             type="button"
             disabled={loading}
             className="post-button draft-button"
-            onClick={(e) => handleSubmit(e, true)} // 👈 Save draft
+            onClick={(e) => handleSubmit(e, true)}
           >
             {loading ? "Saving..." : "Save Draft"}
           </button>
@@ -111,7 +114,7 @@ Lists: - item"
             type="button"
             disabled={loading}
             className="post-button publish-button"
-            onClick={(e) => handleSubmit(e, false)} // 👈 Publish
+            onClick={(e) => handleSubmit(e, false)}
           >
             {loading ? "Publishing..." : "Publish Publicly"}
           </button>
