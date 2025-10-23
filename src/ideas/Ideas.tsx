@@ -30,12 +30,17 @@ export default function Ideas() {
   useEffect(() => {
     async function fetchPosts() {
       const { data, error } = await supabase
-        .from("posts") // table name
-        .select<Post>("*") // row type here
+        .from("posts")
+        .select("*")
         .order("created_at", { ascending: false });
 
-      if (error) console.error(error);
-      else if (data) setPosts(data);
+      if (error) {
+        console.error(error);
+        return;
+      }
+
+      setPosts((data ?? []) as Post[]);
+
       setLoading(false);
     }
     fetchPosts();
