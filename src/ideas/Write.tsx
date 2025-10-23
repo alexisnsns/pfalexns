@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabaseClient";
 import Login from "./Login";
-import "./Ideas.css"; // use the same CSS file
+import "./Ideas.css";
 import { useNavigate } from "react-router-dom";
 import type { User } from "@supabase/supabase-js";
+
 export default function Write() {
   const navigate = useNavigate();
 
@@ -12,6 +13,7 @@ export default function Write() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [user, setUser] = useState<User | null>(null);
+
   useEffect(() => {
     async function fetchUser() {
       const { data } = await supabase.auth.getUser();
@@ -28,12 +30,14 @@ export default function Write() {
 
   if (!user) return <Login />;
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent, draft: boolean) {
     e.preventDefault();
     setLoading(true);
     setMessage("");
 
-    const { error } = await supabase.from("posts").insert([{ title, content }]);
+    const { error } = await supabase
+      .from("posts")
+      .insert([{ title, content, draft }]); // 👈 explicitly insert draft
 
     if (error) {
       console.error(error);
@@ -41,7 +45,7 @@ export default function Write() {
     } else {
       setTitle("");
       setContent("");
-      setMessage("Post created successfully!");
+      setMessage(draft ? "Draft saved!" : "Post published!");
       navigate("/Ideas");
     }
 
@@ -69,7 +73,7 @@ export default function Write() {
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="write-form">
+      <form onSubmit={(e) => e.preventDefault()} className="write-form">
         <input
           type="text"
           placeholder="Title"
@@ -86,9 +90,26 @@ export default function Write() {
           className="edit-textarea"
           required
         />
-        <button type="submit" disabled={loading} className="post-button">
-          {loading ? "Posting..." : "Post"}
-        </button>
+
+        <div className="button-group">
+          <button
+            type="button"
+            disabled={loading}
+            className="post-button draft-button"
+            onClick={(e) => handleSubmit(e, true)} // 👈 Save draft
+          >
+            {loading ? "Saving..." : "Save Draft"}
+          </button>
+
+          <button
+            type="button"
+            disabled={loading}
+            className="post-button publish-button"
+            onClick={(e) => handleSubmit(e, false)} // 👈 Publish
+          >
+            {loading ? "Publishing..." : "Publish Publicly"}
+          </button>
+        </div>
       </form>
 
       {message && <p className="message">{message}</p>}

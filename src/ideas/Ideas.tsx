@@ -2,11 +2,13 @@ import { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabaseClient";
 import "./Ideas.css";
 import type { User } from "@supabase/supabase-js";
+
 type Post = {
   id: number;
   title: string;
   content: string;
   created_at: string;
+  draft: boolean;
 };
 
 export default function Ideas() {
@@ -17,6 +19,7 @@ export default function Ideas() {
   const [editContent, setEditContent] = useState("");
   const [user, setUser] = useState<User | null>(null);
 
+  // --- Get current user
   useEffect(() => {
     async function getUser() {
       const {
@@ -27,12 +30,20 @@ export default function Ideas() {
     getUser();
   }, []);
 
+  // --- Fetch posts
   useEffect(() => {
     async function fetchPosts() {
-      const { data, error } = await supabase
+      let query = supabase
         .from("posts")
         .select("*")
         .order("created_at", { ascending: false });
+
+      // If user is not logged in, only fetch published posts
+      if (!user) {
+        query = query.eq("draft", false);
+      }
+
+      const { data, error } = await query;
 
       if (error) {
         console.error(error);
@@ -40,19 +51,28 @@ export default function Ideas() {
       }
 
       setPosts((data ?? []) as Post[]);
-
       setLoading(false);
     }
-    fetchPosts();
-  }, []);
 
+    fetchPosts();
+  }, [user]); // re-fetch when user logs in/out
+
+  // --- Delete post
+  // --- Delete post
   async function handleDelete(postId: number) {
     if (!user) return alert("You must be logged in to delete posts.");
+
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this post? This action cannot be undone."
+    );
+    if (!confirmed) return;
+
     const { error } = await supabase.from("posts").delete().eq("id", postId);
     if (error) console.error(error);
     else setPosts(posts.filter((p) => p.id !== postId));
   }
 
+  // --- Edit post
   function startEdit(post: Post) {
     setEditingPostId(post.id);
     setEditTitle(post.title);
@@ -65,18 +85,30 @@ export default function Ideas() {
     setEditContent("");
   }
 
-  async function saveEdit(postId: number) {
+  async function saveEdit(postId: number, draftValue: boolean) {
     if (!user) return alert("You must be logged in to edit posts.");
+
     const { error } = await supabase
       .from("posts")
-      .update({ title: editTitle, content: editContent })
+      .update({
+        title: editTitle,
+        content: editContent,
+        draft: draftValue, // <-- use the passed value
+      })
       .eq("id", postId);
 
     if (error) console.error(error);
     else {
       setPosts(
         posts.map((p) =>
-          p.id === postId ? { ...p, title: editTitle, content: editContent } : p
+          p.id === postId
+            ? {
+                ...p,
+                title: editTitle,
+                content: editContent,
+                draft: draftValue,
+              }
+            : p
         )
       );
       cancelEdit();
@@ -90,8 +122,8 @@ export default function Ideas() {
       <div className="ideas-nav">
         <div className="links">
           <a href="/">/Main</a>
-          <a href="/Login">/Login</a>
         </div>
+
         {user ? (
           <div className="user-info">
             <span>{user.email}</span>
@@ -103,9 +135,10 @@ export default function Ideas() {
             >
               Logout
             </button>
+            <a href="/Write">/Write</a>
           </div>
         ) : (
-          <span>Not logged in</span>
+          <a href="/Login">/Login</a>
         )}
       </div>
 
@@ -128,13 +161,25 @@ export default function Ideas() {
                   className="edit-textarea"
                 />
                 <div className="edit-buttons">
-                  <button onClick={() => saveEdit(post.id)}>Save</button>
+                  <button
+                    onClick={() => saveEdit(post.id, false)} // Publish
+                  >
+                    Public Publish
+                  </button>
+                  <button
+                    onClick={() => saveEdit(post.id, true)} // Save Draft
+                  >
+                    Save Draft
+                  </button>
                   <button onClick={cancelEdit}>Cancel</button>
                 </div>
               </>
             ) : (
               <>
-                <h2 className="post-title">{post.title}</h2>
+                <h2 className="post-title">
+                  {post.title}{" "}
+                  {post.draft && <span className="draft-tag">[Draft]</span>}
+                </h2>
                 <p className="post-content">{post.content}</p>
                 <p className="post-date">
                   {new Date(post.created_at).toLocaleDateString()}{" "}

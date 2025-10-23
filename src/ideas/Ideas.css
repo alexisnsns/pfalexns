@@ -76,3 +76,40 @@
   background: none;
   cursor: pointer;
 }
+
+.draft-tag {
+  background: #f5c518;
+  color: #000;
+  font-weight: 600;
+  border-radius: 6px;
+  padding: 2px 6px;
+  margin-left: 6px;
+}
+
+.button-group {
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.post-button {
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.draft-button {
+  background-color: #f5c518;
+  color: #000;
+}
+
+.publish-button {
+  background-color: #28a745;
+  color: white;
+}
+
+.post-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
