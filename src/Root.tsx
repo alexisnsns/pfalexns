@@ -6,6 +6,7 @@ import Write from "./ideas/Write";
 import Login from "./ideas/Login";
 import { supabase } from "../lib/supabaseClient";
 import type { User } from "@supabase/supabase-js";
+import PostPage from "./ideas/postPage";
 
 export default function Root() {
   const [user, setUser] = useState<User | null>(null);
@@ -43,6 +44,7 @@ export default function Root() {
       />
       <Route path="/Login" element={<Login />} />
       <Route path="*" element={<Navigate to="/" replace />} />
+      <Route path="/Ideas/:id" element={<PostPage />} /> {/* dynamic URL */}
     </Routes>
   );
 }

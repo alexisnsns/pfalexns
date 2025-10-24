@@ -4,6 +4,7 @@ import "./Ideas.css";
 import type { User } from "@supabase/supabase-js";
 import ReactMarkdown from "react-markdown";
 import MDEditor from "@uiw/react-md-editor";
+import { Link } from "react-router-dom";
 
 type Post = {
   id: number;
@@ -179,76 +180,81 @@ export default function Ideas() {
       <div className="posts-list">
         {posts.map((post) => (
           <article key={post.id} className="post-item">
-            {editingPostId === post.id ? (
-              <>
-                <input
-                  type="text"
-                  value={editTitle}
-                  onChange={(e) => setEditTitle(e.target.value)}
-                  className="edit-input"
-                />
+            <Link
+              to={`/Ideas/${post.id}`}
+              style={{ textDecoration: "none", color: "inherit" }}
+            >
+              {editingPostId === post.id ? (
+                <>
+                  <input
+                    type="text"
+                    value={editTitle}
+                    onChange={(e) => setEditTitle(e.target.value)}
+                    className="edit-input"
+                  />
 
-                {/* Rich Markdown editor */}
-                <div className="md-editor">
-                  <MDEditor
-                    data-color-mode="light"
-                    value={editContent}
-                    onChange={(val) => setEditContent(val ?? "")} // 👈 coerce undefined to empty string                    height={300}
-                    textareaProps={{
-                      placeholder: `Edit your post in Markdown...
+                  {/* Rich Markdown editor */}
+                  <div className="md-editor">
+                    <MDEditor
+                      data-color-mode="light"
+                      value={editContent}
+                      onChange={(val) => setEditContent(val ?? "")} // 👈 coerce undefined to empty string                    height={300}
+                      textareaProps={{
+                        placeholder: `Edit your post in Markdown...
 **Bold** 
 *Italic* 
 [Link](url)
 - List item`,
-                    }}
-                  />
-                </div>
-
-                <div className="edit-buttons">
-                  <label className="upload-button">
-                    📸 Upload Image
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleImageUpload}
-                      style={{ display: "none" }}
+                      }}
                     />
-                  </label>
-
-                  <button onClick={() => saveEdit(post.id, false)}>
-                    Publish
-                  </button>
-                  <button onClick={() => saveEdit(post.id, true)}>
-                    Save Draft
-                  </button>
-                  <button onClick={cancelEdit}>Cancel</button>
-                </div>
-              </>
-            ) : (
-              <>
-                <h2 className="post-title">
-                  {post.title}{" "}
-                  {post.draft && <span className="draft-tag">[Draft]</span>}
-                </h2>
-
-                <div className="post-content markdown-body">
-                  <ReactMarkdown>{post.content}</ReactMarkdown>
-                </div>
-
-                <p className="post-date">
-                  {new Date(post.created_at).toLocaleDateString()}
-                </p>
-
-                {user && (
-                  <div className="post-actions">
-                    <button onClick={() => startEdit(post)}>Edit</button>
-                    <button onClick={() => handleDelete(post.id)}>
-                      Delete
-                    </button>
                   </div>
-                )}
-              </>
-            )}
+
+                  <div className="edit-buttons">
+                    <label className="upload-button">
+                      📸 Upload Image
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageUpload}
+                        style={{ display: "none" }}
+                      />
+                    </label>
+
+                    <button onClick={() => saveEdit(post.id, false)}>
+                      Publish
+                    </button>
+                    <button onClick={() => saveEdit(post.id, true)}>
+                      Save Draft
+                    </button>
+                    <button onClick={cancelEdit}>Cancel</button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <h2 className="post-title">
+                    {post.title}{" "}
+                    {post.draft && <span className="draft-tag">[Draft]</span>}
+                  </h2>
+
+                  <div className="post-content markdown-body">
+                    <ReactMarkdown>{post.content}</ReactMarkdown>
+                  </div>
+
+                  <p className="post-date">
+                    {new Date(post.created_at).toLocaleDateString()}
+                  </p>
+
+                  {user && (
+                    <div className="post-actions">
+                      <button onClick={() => startEdit(post)}>Edit</button>
+                      <button onClick={() => handleDelete(post.id)}>
+                        Delete
+                      </button>
+                    </div>
+                  )}
+                </>
+              )}
+            </Link>
           </article>
         ))}
       </div>
