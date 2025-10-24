@@ -293,8 +293,10 @@ function App() {
             doge/cbDoge). Started playing with Paraswap SDK to log price
             differences.
           </li>
-          <li>Non-USD stablecoins and decentralized stablecoins</li>
-          <li>
+          <li style={{ marginBottom: "1rem" }}>
+            Non-USD stablecoins and decentralized stablecoins
+          </li>
+          <li >
             I share some of my ideas{" "}
             <a style={styles.link} href="/ideas">
               here
