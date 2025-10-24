@@ -111,13 +111,45 @@ export default function Ideas() {
     }
   }
 
+  async function handleImageUpload(event: React.ChangeEvent<HTMLInputElement>) {
+    try {
+      const file = event.target.files?.[0];
+      if (!file || !user) return;
+
+      // Create unique filename
+      const filePath = `${user.id}/${Date.now()}-${file.name}`;
+
+      // Upload to Supabase Storage bucket
+      const { error: uploadError } = await supabase.storage
+        .from("blogposts")
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      // Get public URL
+      const { data } = supabase.storage
+        .from("blogposts")
+        .getPublicUrl(filePath);
+      const imageUrl = data.publicUrl;
+
+      // Automatically insert Markdown image link
+      setEditContent((prev) => `${prev}\n\n![image](${imageUrl})`);
+      alert("✅ Image uploaded successfully!");
+    } catch (err) {
+      console.error(err);
+      alert("❌ Image upload failed");
+    }
+  }
+
   return (
     <div className="ideas-container">
       <h1 className="ideas-title">Ideas</h1>
 
       <div className="ideas-nav">
         <div className="links">
-          <a href="/">/Main</a>
+          <a href="/" style={styles.link}>
+            /Main
+          </a>
         </div>
 
         {user ? (
@@ -131,10 +163,14 @@ export default function Ideas() {
             >
               Logout
             </button>
-            <a href="/Write">/Write</a>
+            <a href="/Write" style={styles.link}>
+              /Write
+            </a>
           </div>
         ) : (
-          <a href="/Login">/Login</a>
+          <a href="/Login" style={styles.link}>
+            /Login
+          </a>
         )}
       </div>
 
@@ -169,6 +205,16 @@ export default function Ideas() {
                 </div>
 
                 <div className="edit-buttons">
+                  <label className="upload-button">
+                    📸 Upload Image
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageUpload}
+                      style={{ display: "none" }}
+                    />
+                  </label>
+
                   <button onClick={() => saveEdit(post.id, false)}>
                     Publish
                   </button>
@@ -211,3 +257,13 @@ export default function Ideas() {
     </div>
   );
 }
+
+const styles: Record<string, React.CSSProperties> = {
+  link: {
+    color: "#6b7280",
+    textDecoration: "none",
+    fontWeight: 500,
+    transition: "color 0.2s",
+    cursor: "pointer",
+  },
+};

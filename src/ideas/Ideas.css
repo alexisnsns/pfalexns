@@ -103,15 +103,6 @@
   cursor: pointer;
 }
 
-.draft-button {
-  background-color: #f5c518;
-  color: #000;
-}
-
-.publish-button {
-  background-color: #28a745;
-  color: white;
-}
 
 .post-button:disabled {
   opacity: 0.6;
@@ -157,4 +148,22 @@
   padding: 1rem;
   border-radius: 6px;
   overflow-x: auto;
+}
+
+.markdown-body img {
+  max-width: 400px;
+}
+
+.upload-button {
+  background-color: #eee;
+  color: #333;
+  border-radius: 8px;
+  padding: 6px 10px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.upload-button:hover {
+  background-color: #ddd;
 }

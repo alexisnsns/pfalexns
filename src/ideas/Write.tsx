@@ -53,12 +53,45 @@ export default function Write() {
     setLoading(false);
   }
 
+  async function handleImageUpload(event: React.ChangeEvent<HTMLInputElement>) {
+    try {
+      const file = event.target.files?.[0];
+      if (!file || !user) return;
+
+      // Create a unique file name
+      const filePath = `${user.id}/${Date.now()}-${file.name}`;
+
+      // Upload to Supabase Storage
+      const { error: uploadError } = await supabase.storage
+        .from("blogposts")
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      // Get public URL
+      const { data } = supabase.storage
+        .from("blogposts")
+        .getPublicUrl(filePath);
+      const imageUrl = data.publicUrl;
+
+      // Optionally insert into your Markdown editor automatically
+      setContent((prev) => `${prev}\n\n![image](${imageUrl})`);
+
+      setMessage("✅ Image uploaded successfully!");
+    } catch (err) {
+      console.error(err);
+      setMessage("❌ Image upload failed");
+    }
+  }
+
   return (
     <div className="ideas-container">
       <h1 className="ideas-title">Write a New Post</h1>
 
       <div className="ideas-nav">
-        <a href="/Ideas">/Ideas</a>
+        <a href="/Ideas" style={styles.link}>
+          /Ideas
+        </a>
         <div className="links">
           <span className="user-info">
             {user.email}{" "}
@@ -101,6 +134,16 @@ export default function Write() {
         </div>
 
         <div className="button-group">
+          <label className="upload-button">
+            📸 Upload Image
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleImageUpload}
+              style={{ display: "none" }}
+            />
+          </label>
+
           <button
             type="button"
             disabled={loading}
@@ -125,3 +168,13 @@ export default function Write() {
     </div>
   );
 }
+
+const styles: Record<string, React.CSSProperties> = {
+  link: {
+    color: "#6b7280",
+    textDecoration: "none",
+    fontWeight: 500,
+    transition: "color 0.2s",
+    cursor: "pointer",
+  },
+};

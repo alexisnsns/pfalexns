@@ -294,6 +294,12 @@ function App() {
             differences.
           </li>
           <li>Non-USD stablecoins and decentralized stablecoins</li>
+          <li>
+            I share some of my ideas{" "}
+            <a style={styles.link} href="/ideas">
+              here
+            </a>
+          </li>
         </ul>
         <footer style={styles.footer}>
           <p>
