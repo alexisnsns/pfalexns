@@ -28,6 +28,11 @@ function App() {
       link: "https://x.com/defiautopilot",
     },
     {
+      name: "DCAbot",
+      comments: "",
+      displayName: "DeFi DCA Automation",
+    },
+    {
       name: "russianrouleth",
       comments: "",
       displayName: "Russian Rouleth",
@@ -296,7 +301,7 @@ function App() {
           <li style={{ marginBottom: "1rem" }}>
             Non-USD stablecoins and decentralized stablecoins
           </li>
-          <li >
+          <li>
             I share some of my ideas{" "}
             <a style={styles.link} href="/ideas">
               here
