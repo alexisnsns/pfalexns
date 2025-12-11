@@ -36,7 +36,7 @@ function App() {
       name: "russianrouleth",
       comments: "",
       displayName: "Russian Rouleth",
-      link: "https://www.russianrouleth.xyz/",
+      link: "https://www.russianrouleth.lol/",
     },
     { name: "scrapernews", comments: "", displayName: "News Scraper" },
     {
@@ -116,17 +116,17 @@ function App() {
         />
 
         <p style={styles.text}>
-          Currently building{" "}
+          Currently working on{" "}
           <a
             style={styles.link}
-            href="https://x.com/getjoin_io"
+            href="https://x.com/trize_io?lang=en"
             onMouseEnter={(e) => (e.currentTarget.style.color = "#4b5563")}
             onMouseLeave={(e) => (e.currentTarget.style.color = "#6b7280")}
             target="_blank"
           >
-            @getJoin
+            @T-Rize
           </a>
-          's institutional DeFi savings platform.
+           {' '} tokenization platform.
         </p>
         <p style={styles.text}>
           Crafting free range, fair trade, organic software for DeFi teams.
