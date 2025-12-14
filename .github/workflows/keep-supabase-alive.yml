@@ -1,0 +1,30 @@
+name: Keep Supabase Alive
+
+on:
+  schedule:
+    # Runs daily at 12:00 UTC (adjust timezone as needed)
+    - cron: '0 12 * * *'
+  workflow_dispatch: # Allows manual triggering
+
+jobs:
+  ping-supabase:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Supabase
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: |
+          # Make a lightweight query to Supabase REST API
+          # Querying the posts table with limit=0 is very lightweight
+          # This counts as activity and prevents the project from pausing
+          response=$(curl -X GET \
+            "${SUPABASE_URL}/rest/v1/posts?select=id&limit=0" \
+            -H "apikey: ${SUPABASE_ANON_KEY}" \
+            -H "Authorization: Bearer ${SUPABASE_ANON_KEY}" \
+            -H "Prefer: count=exact" \
+            --fail --silent --show-error -w "\nHTTP Status: %{http_code}\n")
+          
+          echo "$response"
+          echo "✅ Supabase ping successful at $(date)"
+
