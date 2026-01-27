@@ -59,7 +59,7 @@ function App() {
     ];
 
     // special case for zenLoop (since it’s on a different repo path)
-    if (projectName.toLowerCase() === "zenloop") {
+    if (projectName.toLowerCase() === "zenLoop") {
       urls.push(
         "https://raw.githubusercontent.com/alexberthon/zenloop/master/README.md"
       );
@@ -126,7 +126,7 @@ function App() {
           >
             @T-Rize
           </a>
-           {' '} tokenization platform.
+          {' '} tokenization platform.
         </p>
         <p style={styles.text}>
           Crafting free range, fair trade, organic software for DeFi teams.
