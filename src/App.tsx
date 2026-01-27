@@ -52,18 +52,21 @@ function App() {
   const fetchReadmeText = async (
     projectName: string
   ): Promise<string | null> => {
-    // default URLs to try for any repo
-    const urls = [
-      `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${projectName}/main/README.md`,
-      `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${projectName}/main/readme.md`,
-    ];
-
-    // special case for zenLoop (since it’s on a different repo path)
-    if (projectName.toLowerCase() === "zenLoop") {
-      urls.push(
-        "https://raw.githubusercontent.com/alexberthon/zenloop/master/README.md"
-      );
+    // special case for zenLoop (since it's on a different repo path)
+    let urls: string[];
+    if (projectName.toLowerCase() === "zenloop") {
+      urls = [
+        "https://raw.githubusercontent.com/alexberthon/zenloop/master/README.md",
+        "https://raw.githubusercontent.com/alexberthon/zenloop/master/readme.md",
+      ];
+    } else {
+      // default URLs to try for any repo
+      urls = [
+        `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${projectName}/main/README.md`,
+        `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${projectName}/main/readme.md`,
+      ];
     }
+
 
     for (const url of urls) {
       try {
@@ -248,7 +251,11 @@ function App() {
               <h3>
                 {p.displayName}
                 <a
-                  href={`https://github.com/${GITHUB_USERNAME}/${p.name}`}
+                  href={
+                    p.name.toLowerCase() === "zenloop"
+                      ? "https://github.com/alexberthon/zenloop"
+                      : `https://github.com/${GITHUB_USERNAME}/${p.name}`
+                  }
                   target="_blank"
                   rel="noopener noreferrer"
                   style={{
