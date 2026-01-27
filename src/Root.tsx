@@ -10,7 +10,6 @@ import PostPage from "./ideas/postPage";
 
 export default function Root() {
   const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function getUser() {
@@ -18,7 +17,6 @@ export default function Root() {
         data: { user },
       } = await supabase.auth.getUser();
       setUser(user);
-      setLoading(false);
     }
 
     getUser();
@@ -32,7 +30,6 @@ export default function Root() {
     return () => listener.subscription.unsubscribe();
   }, []);
 
-  if (loading) return <p className="text-center mt-10">Loading...</p>;
 
   return (
     <Routes>
