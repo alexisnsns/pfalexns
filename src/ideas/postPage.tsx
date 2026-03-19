@@ -4,6 +4,14 @@ import { supabase } from "../../lib/supabaseClient";
 import ReactMarkdown from "react-markdown";
 import MDEditor from "@uiw/react-md-editor";
 import type { User } from "@supabase/supabase-js";
+import {
+  extractTags,
+  ensureTagIds,
+  parseTagInput,
+  POST_SELECT_WITH_TAGS,
+  type PostWithTagsRow,
+} from "../../lib/postTags";
+import Spinner from "./Spinner";
 
 type Post = {
   id: number;
@@ -11,7 +19,7 @@ type Post = {
   content: string;
   created_at: string;
   draft: boolean;
-};
+} & PostWithTagsRow;
 
 const ADMIN_ID = "e0290332-fb6c-4c3b-937f-283095e3a008";
 
@@ -24,6 +32,8 @@ export default function PostPage() {
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState("");
   const [editContent, setEditContent] = useState("");
+  const [newTagInput, setNewTagInput] = useState("");
+  const [tagBusy, setTagBusy] = useState(false);
 
   // --- Fetch current user
   useEffect(() => {
@@ -40,7 +50,7 @@ export default function PostPage() {
       if (!id) return;
       const { data, error } = await supabase
         .from("posts")
-        .select("*")
+        .select(POST_SELECT_WITH_TAGS)
         .eq("id", id)
         .single();
 
@@ -52,6 +62,55 @@ export default function PostPage() {
 
     fetchPost();
   }, [id]);
+
+  async function refetchPost() {
+    if (!id) return;
+    const { data, error } = await supabase
+      .from("posts")
+      .select(POST_SELECT_WITH_TAGS)
+      .eq("id", id)
+      .single();
+    if (!error && data) setPost(data as Post);
+  }
+
+  async function handleAddTags() {
+    if (!user || user.id !== ADMIN_ID || !post) return;
+    const names = parseTagInput(newTagInput);
+    if (!names.length) return;
+    setTagBusy(true);
+    try {
+      const ids = await ensureTagIds(supabase, names);
+      const rows = ids.map((tag_id) => ({ post_id: post.id, tag_id }));
+      const { error } = await supabase.from("post_tags").insert(rows);
+      if (error && error.code !== "23505") throw error;
+      setNewTagInput("");
+      await refetchPost();
+    } catch (e) {
+      console.error(e);
+      alert("Could not add tags. Check RLS policies and the console.");
+    } finally {
+      setTagBusy(false);
+    }
+  }
+
+  async function handleRemoveTag(tagId: number) {
+    if (!user || user.id !== ADMIN_ID || !post) return;
+    setTagBusy(true);
+    try {
+      const { error } = await supabase
+        .from("post_tags")
+        .delete()
+        .eq("post_id", post.id)
+        .eq("tag_id", tagId);
+      if (error) throw error;
+      await refetchPost();
+    } catch (e) {
+      console.error(e);
+      alert("Could not remove tag.");
+    } finally {
+      setTagBusy(false);
+    }
+  }
 
   // --- Delete post
   async function handleDelete() {
@@ -117,8 +176,10 @@ export default function PostPage() {
     }
   }
 
-  if (loading) return <p>Loading...</p>;
+  if (loading) return <Spinner label="Loading post" page />;
   if (!post) return <p>Post not found.</p>;
+
+  const postTags = extractTags(post);
 
   return (
     <div className="ideas-container">
@@ -163,6 +224,26 @@ export default function PostPage() {
           <h1>{post.title}</h1>
           {post.draft && <span className="draft-tag">[Draft]</span>}
           <p>{new Date(post.created_at).toLocaleDateString()}</p>
+          {postTags.length > 0 && (
+            <div className="post-tags post-tags--detail" aria-label="Tags">
+              {postTags.map((t) => (
+                <span key={t.id} className="tag-pill">
+                  {t.name}
+                  {user?.id === ADMIN_ID && (
+                    <button
+                      type="button"
+                      className="tag-pill-remove"
+                      disabled={tagBusy}
+                      onClick={() => handleRemoveTag(t.id)}
+                      aria-label={`Remove tag ${t.name}`}
+                    >
+                      ×
+                    </button>
+                  )}
+                </span>
+              ))}
+            </div>
+          )}
           <div className="post-content markdown-body">
             <ReactMarkdown>{post.content}</ReactMarkdown>
           </div>
@@ -171,17 +252,42 @@ export default function PostPage() {
 
       {/* Admin-only controls */}
       {user && user.id === ADMIN_ID && !isEditing && (
-        <div className="post-actions">
-          <button
-            onClick={() => {
-              setEditTitle(post.title);
-              setEditContent(post.content);
-              setIsEditing(true);
-            }}
-          >
-            Edit
-          </button>
-          <button onClick={handleDelete}>Delete</button>
+        <div className="post-admin-footer">
+          <div className="tag-editor">
+            <input
+              type="text"
+              className="tag-editor-input"
+              placeholder="Add tags (comma-separated)"
+              value={newTagInput}
+              disabled={tagBusy}
+              onChange={(e) => setNewTagInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  handleAddTags();
+                }
+              }}
+            />
+            <button
+              type="button"
+              disabled={tagBusy || !newTagInput.trim()}
+              onClick={handleAddTags}
+            >
+              Add tags
+            </button>
+          </div>
+          <div className="post-actions">
+            <button
+              onClick={() => {
+                setEditTitle(post.title);
+                setEditContent(post.content);
+                setIsEditing(true);
+              }}
+            >
+              Edit
+            </button>
+            <button onClick={handleDelete}>Delete</button>
+          </div>
         </div>
       )}
     </div>

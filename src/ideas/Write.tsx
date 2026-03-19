@@ -5,12 +5,18 @@ import "./Ideas.css";
 import { useNavigate } from "react-router-dom";
 import type { User } from "@supabase/supabase-js";
 import MDEditor from "@uiw/react-md-editor";
+import {
+  ensureTagIds,
+  linkTagsToPost,
+  parseTagInput,
+} from "../../lib/postTags";
 
 export default function Write() {
   const navigate = useNavigate();
 
   const [title, setTitle] = useState("");
   const [content, setContent] = useState(""); // Markdown content
+  const [tagsInput, setTagsInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [user, setUser] = useState<User | null>(null);
@@ -36,16 +42,39 @@ export default function Write() {
     setLoading(true);
     setMessage("");
 
-    const { error } = await supabase
+    const { data: inserted, error } = await supabase
       .from("posts")
-      .insert([{ title, content, draft }]); // explicitly insert draft
+      .insert([{ title, content, draft }])
+      .select("id")
+      .single();
 
     if (error) {
       console.error(error);
       setMessage("Error creating post");
     } else {
+      const tagNames = parseTagInput(tagsInput);
+      if (tagNames.length && inserted?.id != null) {
+        try {
+          const tagIds = await ensureTagIds(supabase, tagNames);
+          await linkTagsToPost(supabase, inserted.id, tagIds);
+        } catch (tagErr) {
+          console.error(tagErr);
+          setMessage(
+            draft
+              ? "Draft saved, but tags could not be saved."
+              : "Post published, but tags could not be saved."
+          );
+          setTitle("");
+          setContent("");
+          setTagsInput("");
+          navigate("/Ideas");
+          setLoading(false);
+          return;
+        }
+      }
       setTitle("");
       setContent("");
+      setTagsInput("");
       setMessage(draft ? "Draft saved!" : "Post published!");
       navigate("/Ideas");
     }
@@ -115,6 +144,15 @@ export default function Write() {
           onChange={(e) => setTitle(e.target.value)}
           className="edit-input"
           required
+        />
+
+        <input
+          type="text"
+          placeholder="Tags (optional, comma-separated)"
+          value={tagsInput}
+          onChange={(e) => setTagsInput(e.target.value)}
+          className="edit-input"
+          aria-label="Tags"
         />
 
         {/* Replace textarea with MDEditor */}
