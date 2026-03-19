@@ -4,6 +4,7 @@ import "./Ideas.css";
 import type { User } from "@supabase/supabase-js";
 import ReactMarkdown from "react-markdown";
 import { Link } from "react-router-dom";
+import { track } from "@vercel/analytics/react";
 import Spinner from "./Spinner";
 import {
   extractTags,
@@ -204,6 +205,13 @@ export default function Ideas() {
             <Link
               to={`/Ideas/${post.id}`}
               style={{ textDecoration: "none", color: "inherit" }}
+              onClick={() => {
+                track("Article Click", {
+                  post_id: post.id,
+                  title: post.title,
+                  draft: post.draft,
+                });
+              }}
             >
               <h2 className="post-title">
                 {post.title}{" "}

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { Analytics } from "@vercel/analytics/react";
 import App from "./App";
 import Ideas from "./ideas/Ideas";
 import Write from "./ideas/Write";
@@ -7,6 +8,11 @@ import Login from "./ideas/Login";
 import { supabase } from "../lib/supabaseClient";
 import type { User } from "@supabase/supabase-js";
 import PostPage from "./ideas/postPage";
+
+function RouteAnalytics() {
+  const { pathname, search } = useLocation();
+  return <Analytics route={pathname} path={pathname + search} />;
+}
 
 export default function Root() {
   const [user, setUser] = useState<User | null>(null);
@@ -32,6 +38,8 @@ export default function Root() {
 
 
   return (
+    <>
+      <RouteAnalytics />
     <Routes>
       <Route path="/" element={<App />} />
       <Route path="/Ideas" element={<Ideas />} />
@@ -43,5 +51,6 @@ export default function Root() {
       <Route path="*" element={<Navigate to="/" replace />} />
       <Route path="/Ideas/:id" element={<PostPage />} /> {/* dynamic URL */}
     </Routes>
+    </>
   );
 }
