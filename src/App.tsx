@@ -16,6 +16,12 @@ const GITHUB_USERNAME = "alexisnsns";
 function App() {
   const [projects, setProjects] = useState<Project[]>([
     {
+      name: "ondo-analytics",
+      comments: "",
+      displayName: "Ondo RWA",
+      link: "https://ondofinance.dev/",
+    },
+    {
       name: "sepoliafaucet",
       comments: "",
       displayName: "Sepolia Faucet",
