@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { FaGithub } from "react-icons/fa";
 import { FiCheck } from "react-icons/fi";
 import GoogleAnalytics from "./googleAnalytics";
@@ -199,7 +200,7 @@ function App() {
             </a>
             ·
             <a
-              href="/resumeAlexN.pdf"
+              href="./resumeAlexN.pdf"
               target="_blank"
               rel="noopener noreferrer"
               style={styles.link}
@@ -316,9 +317,9 @@ function App() {
           </li>
           <li>
             I share some of my ideas{" "}
-            <a style={styles.link} href="/ideas">
+            <Link style={styles.link} to="/Ideas">
               here
-            </a>
+            </Link>
           </li>
         </ul>
         <footer style={styles.footer}>
