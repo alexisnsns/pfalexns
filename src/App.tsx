@@ -57,7 +57,7 @@ function App() {
   ]);
 
   const fetchReadmeText = async (
-    projectName: string
+    projectName: string,
   ): Promise<string | null> => {
     // special case for zenLoop (since it's on a different repo path)
     let urls: string[];
@@ -73,7 +73,6 @@ function App() {
         `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${projectName}/main/readme.md`,
       ];
     }
-
 
     for (const url of urls) {
       try {
@@ -93,7 +92,7 @@ function App() {
         projects.map(async (p) => {
           const readme = await fetchReadmeText(p.name);
           return { ...p, readme };
-        })
+        }),
       );
       setProjects(updated);
     };
@@ -135,8 +134,8 @@ function App() {
             target="_blank"
           >
             @T-Rize
-          </a>
-          {' '} tokenization platform.
+          </a>{" "}
+          tokenization platform.
         </p>
         <p style={styles.text}>
           Crafting free range, fair trade, organic software for DeFi teams.
@@ -224,6 +223,12 @@ function App() {
           Selected professional experience:
         </p>
         <ul style={{ ...styles.text, textAlign: "left", lineHeight: 1.5 }}>
+          <li>
+            <a href="https://www.trize.io/" style={styles.link}>
+              T-Rize
+            </a>
+            : Tokenization & RWA platform
+          </li>
           <li>
             <a href="https://getjoin.io/join-pro" style={styles.link}>
               Join Pro
