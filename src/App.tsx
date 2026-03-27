@@ -224,13 +224,21 @@ function App() {
         </p>
         <ul style={{ ...styles.text, textAlign: "left", lineHeight: 1.5 }}>
           <li>
-            <a href="https://www.trize.io/" style={styles.link}>
+            <a
+              href="https://www.t-rize.io/"
+              target="_blank"
+              style={styles.link}
+            >
               T-Rize
             </a>
             : Tokenization & RWA platform
           </li>
           <li>
-            <a href="https://getjoin.io/join-pro" style={styles.link}>
+            <a
+              href="https://getjoin.io/join-pro"
+              target="_blank"
+              style={styles.link}
+            >
               Join Pro
             </a>
             : Institutional DeFi savings & treasury platform
@@ -238,6 +246,7 @@ function App() {
           <li>
             <a
               href="https://apps.apple.com/us/app/join-wallet/id6590635145"
+              target="_blank"
               style={styles.link}
             >
               Join Wallet
@@ -245,7 +254,11 @@ function App() {
             : Self-custodial MPC crypto wallet (iOS/Android)
           </li>
           <li>
-            <a href="https://www.apeworx.io/" style={styles.link}>
+            <a
+              href="https://www.apeworx.io/"
+              target="_blank"
+              style={styles.link}
+            >
               ApeWorx
             </a>
             : Open-source smart contract dev toolkit
