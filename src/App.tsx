@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { FaGithub } from "react-icons/fa";
 import { FiCheck } from "react-icons/fi";
 import GoogleAnalytics from "./googleAnalytics";
@@ -56,7 +57,7 @@ function App() {
   ]);
 
   const fetchReadmeText = async (
-    projectName: string
+    projectName: string,
   ): Promise<string | null> => {
     // special case for zenLoop (since it's on a different repo path)
     let urls: string[];
@@ -72,7 +73,6 @@ function App() {
         `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${projectName}/main/readme.md`,
       ];
     }
-
 
     for (const url of urls) {
       try {
@@ -92,7 +92,7 @@ function App() {
         projects.map(async (p) => {
           const readme = await fetchReadmeText(p.name);
           return { ...p, readme };
-        })
+        }),
       );
       setProjects(updated);
     };
@@ -134,8 +134,8 @@ function App() {
             target="_blank"
           >
             @T-Rize
-          </a>
-          {' '} tokenization platform.
+          </a>{" "}
+          tokenization platform.
         </p>
         <p style={styles.text}>
           Crafting free range, fair trade, organic software for DeFi teams.
@@ -199,7 +199,7 @@ function App() {
             </a>
             ·
             <a
-              href="/resumeAlexN.pdf"
+              href="./resumeAlexN.pdf"
               target="_blank"
               rel="noopener noreferrer"
               style={styles.link}
@@ -223,6 +223,12 @@ function App() {
           Selected professional experience:
         </p>
         <ul style={{ ...styles.text, textAlign: "left", lineHeight: 1.5 }}>
+          <li>
+            <a href="https://www.trize.io/" style={styles.link}>
+              T-Rize
+            </a>
+            : Tokenization & RWA platform
+          </li>
           <li>
             <a href="https://getjoin.io/join-pro" style={styles.link}>
               Join Pro
@@ -316,9 +322,9 @@ function App() {
           </li>
           <li>
             I share some of my ideas{" "}
-            <a style={styles.link} href="/ideas">
+            <Link style={styles.link} to="/Ideas">
               here
-            </a>
+            </Link>
           </li>
         </ul>
         <footer style={styles.footer}>

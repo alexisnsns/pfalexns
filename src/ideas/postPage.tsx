@@ -1,4 +1,4 @@
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabaseClient";
 import ReactMarkdown from "react-markdown";
@@ -25,6 +25,7 @@ const ADMIN_ID = "e0290332-fb6c-4c3b-937f-283095e3a008";
 
 export default function PostPage() {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const [post, setPost] = useState<Post | null>(null);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<User | null>(null);
@@ -120,7 +121,7 @@ export default function PostPage() {
 
     const { error } = await supabase.from("posts").delete().eq("id", post?.id);
     if (error) console.error(error);
-    else window.location.href = "/Ideas";
+    else navigate("/Ideas");
   }
 
   // --- Save edited post

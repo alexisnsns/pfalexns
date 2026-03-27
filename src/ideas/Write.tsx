@@ -29,7 +29,7 @@ export default function Write() {
     fetchUser();
 
     const { data: listener } = supabase.auth.onAuthStateChange(
-      (_event, session) => setUser(session?.user ?? null)
+      (_event, session) => setUser(session?.user ?? null),
     );
 
     return () => listener.subscription.unsubscribe();
@@ -62,7 +62,7 @@ export default function Write() {
           setMessage(
             draft
               ? "Draft saved, but tags could not be saved."
-              : "Post published, but tags could not be saved."
+              : "Post published, but tags could not be saved.",
           );
           setTitle("");
           setContent("");
@@ -118,7 +118,7 @@ export default function Write() {
       <h1 className="ideas-title">Write a New Post</h1>
 
       <div className="ideas-nav">
-        <a href="/Ideas" style={styles.link}>
+        <a href="/#/Ideas" style={styles.link}>
           /Ideas
         </a>
         <div className="links">

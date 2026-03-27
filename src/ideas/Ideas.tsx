@@ -4,7 +4,6 @@ import "./Ideas.css";
 import type { User } from "@supabase/supabase-js";
 import ReactMarkdown from "react-markdown";
 import { Link } from "react-router-dom";
-import { track } from "@vercel/analytics/react";
 import Spinner from "./Spinner";
 import {
   extractTags,
@@ -75,13 +74,13 @@ export default function Ideas() {
       }
     }
     return [...bySlug.values()].sort((a, b) =>
-      a.name.localeCompare(b.name, undefined, { sensitivity: "base" })
+      a.name.localeCompare(b.name, undefined, { sensitivity: "base" }),
     );
   }, [draftFilteredPosts]);
 
   const availableSlugSet = useMemo(
     () => new Set(availableTags.map((t) => t.slug)),
-    [availableTags]
+    [availableTags],
   );
 
   const selectedSlugSet = useMemo(() => {
@@ -95,13 +94,13 @@ export default function Ideas() {
   const visiblePosts = useMemo(() => {
     if (selectedSlugSet.size === 0) return draftFilteredPosts;
     return draftFilteredPosts.filter((p) =>
-      extractTags(p).some((t) => selectedSlugSet.has(t.slug))
+      extractTags(p).some((t) => selectedSlugSet.has(t.slug)),
     );
   }, [draftFilteredPosts, selectedSlugSet]);
 
   function toggleTagFilter(slug: string) {
     setSelectedTagSlugs((prev) =>
-      prev.includes(slug) ? prev.filter((s) => s !== slug) : [...prev, slug]
+      prev.includes(slug) ? prev.filter((s) => s !== slug) : [...prev, slug],
     );
   }
 
@@ -111,9 +110,9 @@ export default function Ideas() {
 
       <div className="ideas-nav">
         <div className="links">
-          <a href="/" style={styles.link}>
+          <Link to="/" style={styles.link}>
             /Main
-          </a>
+          </Link>
         </div>
 
         {user ? (
@@ -139,11 +138,7 @@ export default function Ideas() {
       </div>
 
       {user && (
-        <div
-          className="ideas-filter"
-          role="group"
-          aria-label="Show posts"
-        >
+        <div className="ideas-filter" role="group" aria-label="Show posts">
           <button
             type="button"
             className={
@@ -201,46 +196,39 @@ export default function Ideas() {
         {visiblePosts.map((post) => {
           const tags = extractTags(post);
           return (
-          <article key={post.id} className="post-item">
-            <Link
-              to={`/Ideas/${post.id}`}
-              style={{ textDecoration: "none", color: "inherit" }}
-              onClick={() => {
-                track("Article Click", {
-                  post_id: post.id,
-                  title: post.title,
-                  draft: post.draft,
-                });
-              }}
-            >
-              <h2 className="post-title">
-                {post.title}{" "}
-                {post.draft && <span className="draft-tag">[Draft]</span>}
-              </h2>
+            <article key={post.id} className="post-item">
+              <Link
+                to={`/Ideas/${post.id}`}
+                style={{ textDecoration: "none", color: "inherit" }}
+              >
+                <h2 className="post-title">
+                  {post.title}{" "}
+                  {post.draft && <span className="draft-tag">[Draft]</span>}
+                </h2>
 
-              {tags.length > 0 && (
-                <div className="post-tags" aria-label="Tags">
-                  {tags.map((t) => (
-                    <span key={t.id} className="tag-pill">
-                      {t.name}
-                    </span>
-                  ))}
+                {tags.length > 0 && (
+                  <div className="post-tags" aria-label="Tags">
+                    {tags.map((t) => (
+                      <span key={t.id} className="tag-pill">
+                        {t.name}
+                      </span>
+                    ))}
+                  </div>
+                )}
+
+                <div className="post-content markdown-body">
+                  <ReactMarkdown>
+                    {post.content.length > 200
+                      ? post.content.slice(0, 200) + "..."
+                      : post.content}
+                  </ReactMarkdown>
                 </div>
-              )}
 
-              <div className="post-content markdown-body">
-                <ReactMarkdown>
-                  {post.content.length > 200
-                    ? post.content.slice(0, 200) + "..."
-                    : post.content}
-                </ReactMarkdown>
-              </div>
-
-              <p className="post-date">
-                {new Date(post.created_at).toLocaleDateString()}
-              </p>
-            </Link>
-          </article>
+                <p className="post-date">
+                  {new Date(post.created_at).toLocaleDateString()}
+                </p>
+              </Link>
+            </article>
           );
         })}
       </div>
