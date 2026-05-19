@@ -34,6 +34,9 @@ h2 {
 
 @media (max-width: 500px) {
   .container {
-    padding: 0 !important;
+    padding: 1rem !important;
+  }
+  .project-card h3 {
+    text-align: center;
   }
 }

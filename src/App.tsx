@@ -340,18 +340,25 @@ function App() {
             </Link>
           </li>
         </ul>
+        <hr
+          style={{
+            width: "60%",
+            border: "none",
+            borderTop: "1px solid #e2e8f0",
+          }}
+        />
         <footer style={styles.footer}>
           <p>
             Feel free to re-use this basic Vite/TSX template for your own needs
-            <a
-              href={`https://github.com/${GITHUB_USERNAME}/pfalexns`}
-              target="_blank"
-              rel="noopener noreferrer"
-              style={styles.repoLink}
-            >
-              <FaGithub size={16} strokeWidth={2} style={{ marginLeft: 4 }} />
-            </a>
           </p>
+          <a
+            href={`https://github.com/${GITHUB_USERNAME}/pfalexns`}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={styles.repoLink}
+          >
+            <FaGithub size={16} strokeWidth={2} />
+          </a>
         </footer>
       </div>
     </>
@@ -403,9 +410,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
 
   footer: {
-    marginTop: "4rem",
-    paddingTop: "1.5rem",
-    borderTop: "1px solid #e2e8f0",
+    // marginTop: "1.5rem",
     fontSize: "0.9rem",
     opacity: 0.7,
     textAlign: "center",
