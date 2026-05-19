@@ -2,29 +2,37 @@ name: Keep Supabase Alive
 
 on:
   schedule:
-    # Runs daily at 12:00 UTC (adjust timezone as needed)
-    - cron: '0 12 * * *'
-  workflow_dispatch: # Allows manual triggering
+    - cron: '0 12 * * 1' # Every Monday at 12:00 UTC
+  workflow_dispatch:
 
 jobs:
   ping-supabase:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Ping Supabase
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
         run: |
-          # Make a lightweight query to Supabase REST API
-          # Querying the posts table with limit=0 is very lightweight
-          # This counts as activity and prevents the project from pausing
           response=$(curl -X GET \
             "${SUPABASE_URL}/rest/v1/posts?select=id&limit=0" \
             -H "apikey: ${SUPABASE_ANON_KEY}" \
             -H "Authorization: Bearer ${SUPABASE_ANON_KEY}" \
             -H "Prefer: count=exact" \
             --fail --silent --show-error -w "\nHTTP Status: %{http_code}\n")
-          
           echo "$response"
-          echo "✅ Supabase ping successful at $(date)"
+
+      - name: Commit keepalive
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          echo "$(date -u)" > keepalive.txt
+          git add keepalive.txt
+          git commit -m "chore: keepalive $(date -u +%Y-%m-%d)"
+          git push
 
