@@ -2,18 +2,13 @@ name: Keep Supabase Alive
 
 on:
   schedule:
-    - cron: '0 12 * * 1' # Every Monday at 12:00 UTC
+    - cron: '0 12 */3 * *' # Every 3 days at 12:00 UTC (well under Supabase's 7-day pause window)
   workflow_dispatch:
 
 jobs:
   ping-supabase:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
       - name: Ping Supabase
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
@@ -26,13 +21,4 @@ jobs:
             -H "Prefer: count=exact" \
             --fail --silent --show-error -w "\nHTTP Status: %{http_code}\n")
           echo "$response"
-
-      - name: Commit keepalive
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          echo "$(date -u)" > keepalive.txt
-          git add keepalive.txt
-          git commit -m "chore: keepalive $(date -u +%Y-%m-%d)"
-          git push
 
