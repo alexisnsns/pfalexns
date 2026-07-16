@@ -14,16 +14,25 @@ jobs:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
         run: |
-          # Insert a row so the request generates real DATABASE activity.
-          # Supabase's 7-day pause timer only resets on DB activity; a read-only
-          # request does not reliably count, so we write instead.
-          response=$(curl -X POST \
+          # Writing generates real DATABASE activity, which is what resets
+          # Supabase's 7-day pause timer (a read-only request does not reliably
+          # count). Delete existing rows first so the table never grows beyond
+          # the single row we just inserted.
+          echo "Clearing old keepalive rows..."
+          curl -X DELETE \
+            "${SUPABASE_URL}/rest/v1/keepalive?id=gte.0" \
+            -H "apikey: ${SUPABASE_ANON_KEY}" \
+            -H "Authorization: Bearer ${SUPABASE_ANON_KEY}" \
+            -H "Prefer: return=minimal" \
+            --fail --silent --show-error -w "DELETE HTTP Status: %{http_code}\n"
+
+          echo "Inserting fresh keepalive row..."
+          curl -X POST \
             "${SUPABASE_URL}/rest/v1/keepalive" \
             -H "apikey: ${SUPABASE_ANON_KEY}" \
             -H "Authorization: Bearer ${SUPABASE_ANON_KEY}" \
             -H "Content-Type: application/json" \
             -H "Prefer: return=minimal" \
             -d '{}' \
-            --fail --silent --show-error -w "\nHTTP Status: %{http_code}\n")
-          echo "$response"
+            --fail --silent --show-error -w "POST HTTP Status: %{http_code}\n"
 
