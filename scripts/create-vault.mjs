@@ -35,10 +35,10 @@ if (passphrase !== confirm) {
   process.exit(1);
 }
 if (passphrase.length < 12) {
-  console.error(
-    "That passphrase is short. vault.json will be public, so it's offline-brute-forceable — use something longer.",
+  console.warn(
+    "\nWarning: that passphrase is short. vault.json will be public, so it's offline-brute-forceable.",
   );
-  process.exit(1);
+  console.warn("Proceeding anyway — re-run this script any time to switch to a stronger one.\n");
 }
 
 const salt = randomBytes(16);
