@@ -1,107 +1,78 @@
 import { useEffect, useMemo, useState } from "react";
-import { supabase } from "../../lib/supabaseClient";
+import {
+  fetchPublishedIndex,
+  fetchDraftIndex,
+  getStoredPat,
+  clearPat,
+  type Post,
+} from "../../lib/githubClient";
 import "./Ideas.css";
-import type { User } from "@supabase/supabase-js";
 import ReactMarkdown from "react-markdown";
 import { Link } from "react-router-dom";
 import Spinner from "./Spinner";
-import {
-  extractTags,
-  type PostWithTagsRow,
-  POST_SELECT_WITH_TAGS,
-  type Tag,
-} from "../../lib/postTags";
 
-type Post = {
-  id: number;
-  title: string;
-  content: string;
-  created_at: string;
+type IndexPost = Pick<Post, "slug" | "title" | "created_at" | "tags"> & {
+  excerpt: string;
   draft: boolean;
-} & PostWithTagsRow;
+};
 
 type IdeasFilter = "published" | "drafts";
 
 export default function Ideas() {
-  const [posts, setPosts] = useState<Post[]>([]);
+  const [posts, setPosts] = useState<IndexPost[]>([]);
   const [loading, setLoading] = useState(true);
-  const [user, setUser] = useState<User | null>(null);
+  const [pat, setPat] = useState<string | null>(() => getStoredPat());
   const [ideasFilter, setIdeasFilter] = useState<IdeasFilter>("published");
-  const [selectedTagSlugs, setSelectedTagSlugs] = useState<string[]>([]);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
-  // --- Get current user
   useEffect(() => {
-    async function getUser() {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      setUser(user ?? null);
+    function onPatChanged() {
+      setPat(getStoredPat());
     }
-    getUser();
+    window.addEventListener("pfalexns-pat-changed", onPatChanged);
+    return () => window.removeEventListener("pfalexns-pat-changed", onPatChanged);
   }, []);
 
-  // --- Fetch posts
   useEffect(() => {
     async function fetchPosts() {
-      const { data, error } = await supabase
-        .from("posts")
-        .select(POST_SELECT_WITH_TAGS)
-        .order("created_at", { ascending: false });
-
-      if (error) {
-        console.error(error);
-        return;
+      setLoading(true);
+      const published = (await fetchPublishedIndex()).map((p) => ({ ...p, draft: false }));
+      let drafts: IndexPost[] = [];
+      if (pat) {
+        drafts = (await fetchDraftIndex(pat)).map((p) => ({ ...p, draft: true }));
       }
-
-      setPosts((data ?? []) as Post[]);
+      setPosts([...published, ...drafts]);
       setLoading(false);
     }
-
     fetchPosts();
-  }, [user]);
+  }, [pat]);
 
   const draftFilteredPosts = useMemo(() => {
-    if (!user) return posts.filter((p) => !p.draft);
-    if (ideasFilter === "published") return posts.filter((p) => !p.draft);
-    return posts.filter((p) => p.draft);
-  }, [posts, user, ideasFilter]);
+    if (!pat) return posts.filter((p) => !p.draft);
+    return posts.filter((p) => (ideasFilter === "published" ? !p.draft : p.draft));
+  }, [posts, pat, ideasFilter]);
 
   const availableTags = useMemo(() => {
-    const bySlug = new Map<string, Tag>();
-    for (const p of draftFilteredPosts) {
-      for (const t of extractTags(p)) {
-        if (!bySlug.has(t.slug)) bySlug.set(t.slug, t);
-      }
-    }
-    return [...bySlug.values()].sort((a, b) =>
-      a.name.localeCompare(b.name, undefined, { sensitivity: "base" }),
-    );
+    const set = new Set<string>();
+    for (const p of draftFilteredPosts) for (const t of p.tags) set.add(t);
+    return [...set].sort((a, b) => a.localeCompare(b, undefined, { sensitivity: "base" }));
   }, [draftFilteredPosts]);
 
-  const availableSlugSet = useMemo(
-    () => new Set(availableTags.map((t) => t.slug)),
-    [availableTags],
-  );
+  const availableTagSet = useMemo(() => new Set(availableTags), [availableTags]);
 
-  const selectedSlugSet = useMemo(() => {
+  const selectedTagSet = useMemo(() => {
     const next = new Set<string>();
-    for (const s of selectedTagSlugs) {
-      if (availableSlugSet.has(s)) next.add(s);
-    }
+    for (const t of selectedTags) if (availableTagSet.has(t)) next.add(t);
     return next;
-  }, [selectedTagSlugs, availableSlugSet]);
+  }, [selectedTags, availableTagSet]);
 
   const visiblePosts = useMemo(() => {
-    if (selectedSlugSet.size === 0) return draftFilteredPosts;
-    return draftFilteredPosts.filter((p) =>
-      extractTags(p).some((t) => selectedSlugSet.has(t.slug)),
-    );
-  }, [draftFilteredPosts, selectedSlugSet]);
+    if (selectedTagSet.size === 0) return draftFilteredPosts;
+    return draftFilteredPosts.filter((p) => p.tags.some((t) => selectedTagSet.has(t)));
+  }, [draftFilteredPosts, selectedTagSet]);
 
-  function toggleTagFilter(slug: string) {
-    setSelectedTagSlugs((prev) =>
-      prev.includes(slug) ? prev.filter((s) => s !== slug) : [...prev, slug],
-    );
+  function toggleTagFilter(tag: string) {
+    setSelectedTags((prev) => (prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]));
   }
 
   return (
@@ -115,13 +86,11 @@ export default function Ideas() {
           </Link>
         </div>
 
-        {user ? (
+        {pat ? (
           <div className="user-info">
-            <span>{user.email}</span>
             <button
-              onClick={async () => {
-                await supabase.auth.signOut();
-                setUser(null);
+              onClick={() => {
+                clearPat();
               }}
             >
               Logout
@@ -137,7 +106,7 @@ export default function Ideas() {
         )}
       </div>
 
-      {user && (
+      {pat && (
         <div className="ideas-filter" role="group" aria-label="Show posts">
           <button
             type="button"
@@ -169,10 +138,10 @@ export default function Ideas() {
           <span className="ideas-tag-filter-label">Tags</span>
           <div className="ideas-tag-filter-chips" role="group">
             {availableTags.map((t) => {
-              const selected = selectedSlugSet.has(t.slug);
+              const selected = selectedTagSet.has(t);
               return (
                 <button
-                  key={t.slug}
+                  key={t}
                   type="button"
                   className={
                     selected
@@ -180,9 +149,9 @@ export default function Ideas() {
                       : "ideas-tag-filter-chip"
                   }
                   aria-pressed={selected}
-                  onClick={() => toggleTagFilter(t.slug)}
+                  onClick={() => toggleTagFilter(t)}
                 >
-                  {t.name}
+                  {t}
                 </button>
               );
             })}
@@ -193,51 +162,40 @@ export default function Ideas() {
       {loading && <Spinner label="Loading posts" />}
 
       <div className="posts-list">
-        {visiblePosts.map((post) => {
-          const tags = extractTags(post);
-          return (
-            <article key={post.id} className="post-item">
-              <Link
-                to={`/Ideas/${post.id}`}
-                style={{ textDecoration: "none", color: "inherit" }}
-              >
-                <h2 className="post-title">
-                  {post.title}{" "}
-                  {post.draft && <span className="draft-tag">[Draft]</span>}
-                </h2>
+        {visiblePosts.map((post) => (
+          <article key={post.slug} className="post-item">
+            <Link to={`/Ideas/${post.slug}`} style={{ textDecoration: "none", color: "inherit" }}>
+              <h2 className="post-title">
+                {post.title} {post.draft && <span className="draft-tag">[Draft]</span>}
+              </h2>
 
-                {tags.length > 0 && (
-                  <div className="post-tags" aria-label="Tags">
-                    {tags.map((t) => (
-                      <span key={t.id} className="tag-pill">
-                        {t.name}
-                      </span>
-                    ))}
-                  </div>
-                )}
-
-                <div className="post-content markdown-body">
-                  <ReactMarkdown>
-                    {post.content.length > 200
-                      ? post.content.slice(0, 200) + "..."
-                      : post.content}
-                  </ReactMarkdown>
+              {post.tags.length > 0 && (
+                <div className="post-tags" aria-label="Tags">
+                  {post.tags.map((t) => (
+                    <span key={t} className="tag-pill">
+                      {t}
+                    </span>
+                  ))}
                 </div>
+              )}
 
-                <p className="post-date">
-                  {new Date(post.created_at).toLocaleDateString()}
-                </p>
-              </Link>
-            </article>
-          );
-        })}
+              {post.excerpt && (
+                <div className="post-content markdown-body">
+                  <ReactMarkdown>{post.excerpt}</ReactMarkdown>
+                </div>
+              )}
+
+              <p className="post-date">{new Date(post.created_at).toLocaleDateString()}</p>
+            </Link>
+          </article>
+        ))}
       </div>
 
       {!loading && visiblePosts.length === 0 && (
         <p>
-          {selectedSlugSet.size > 0 && draftFilteredPosts.length > 0
+          {selectedTagSet.size > 0 && draftFilteredPosts.length > 0
             ? "No posts match the selected tags."
-            : !user
+            : !pat
               ? "No posts yet. Stay tuned!"
               : ideasFilter === "drafts"
                 ? "No drafts."

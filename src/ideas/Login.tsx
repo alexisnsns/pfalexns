@@ -1,54 +1,44 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "../../lib/supabaseClient";
-import "./Ideas.css"; // use same CSS file
+import { unlockWithPassphrase } from "../../lib/githubClient";
+import "./Ideas.css";
 
 export default function Login() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [passphrase, setPassphrase] = useState("");
   const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  async function handleLogin(e: React.FormEvent) {
+  async function handleUnlock(e: React.FormEvent) {
     e.preventDefault();
     setMessage("");
-
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-
-    if (error) {
-      setMessage(error.message);
-    } else {
-      setMessage("Logged in successfully!");
+    setLoading(true);
+    try {
+      await unlockWithPassphrase(passphrase);
       navigate("/Write");
+    } catch (err) {
+      setMessage(err instanceof Error ? err.message : "Could not unlock.");
+    } finally {
+      setLoading(false);
     }
   }
 
   return (
     <div className="ideas-container">
-      <h1 className="ideas-title">Login</h1>
+      <h1 className="ideas-title">Unlock</h1>
 
-      <form onSubmit={handleLogin} className="write-form">
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="edit-input"
-          required
-        />
+      <form onSubmit={handleUnlock} className="write-form">
         <input
           type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
+          placeholder="Passphrase"
+          value={passphrase}
+          onChange={(e) => setPassphrase(e.target.value)}
           className="edit-input"
           required
+          autoFocus
         />
-        <button type="submit" className="post-button">
-          Login
+        <button type="submit" className="post-button" disabled={loading}>
+          {loading ? "Unlocking..." : "Unlock"}
         </button>
       </form>
 
