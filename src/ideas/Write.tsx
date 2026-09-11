@@ -1,82 +1,59 @@
-import { useEffect, useState } from "react";
-import { supabase } from "../../lib/supabaseClient";
+import { useState } from "react";
+import {
+  getStoredPat,
+  clearPat,
+  slugify,
+  saveDraft,
+  publishPost,
+  uploadImage,
+} from "../../lib/githubClient";
 import Login from "./Login";
 import "./Ideas.css";
 import { useNavigate } from "react-router-dom";
-import type { User } from "@supabase/supabase-js";
 import MDEditor from "@uiw/react-md-editor";
-import {
-  ensureTagIds,
-  linkTagsToPost,
-  parseTagInput,
-} from "../../lib/postTags";
+import { parseTagInput } from "../../lib/postTags";
 
 export default function Write() {
   const navigate = useNavigate();
+  const pat = getStoredPat();
 
   const [title, setTitle] = useState("");
-  const [content, setContent] = useState(""); // Markdown content
+  const [content, setContent] = useState("");
   const [tagsInput, setTagsInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
-  const [user, setUser] = useState<User | null>(null);
 
-  useEffect(() => {
-    async function fetchUser() {
-      const { data } = await supabase.auth.getUser();
-      setUser(data.user ?? null);
-    }
-    fetchUser();
-
-    const { data: listener } = supabase.auth.onAuthStateChange(
-      (_event, session) => setUser(session?.user ?? null),
-    );
-
-    return () => listener.subscription.unsubscribe();
-  }, []);
-
-  if (!user) return <Login />;
+  if (!pat) return <Login />;
 
   async function handleSubmit(e: React.FormEvent, draft: boolean) {
     e.preventDefault();
+    if (!pat) return;
     setLoading(true);
     setMessage("");
 
-    const { data: inserted, error } = await supabase
-      .from("posts")
-      .insert([{ title, content, draft }])
-      .select("id")
-      .single();
+    const post = {
+      slug: slugify(title),
+      title,
+      content,
+      created_at: new Date().toISOString(),
+      tags: parseTagInput(tagsInput),
+    };
 
-    if (error) {
-      console.error(error);
-      setMessage("Error creating post");
-    } else {
-      const tagNames = parseTagInput(tagsInput);
-      if (tagNames.length && inserted?.id != null) {
-        try {
-          const tagIds = await ensureTagIds(supabase, tagNames);
-          await linkTagsToPost(supabase, inserted.id, tagIds);
-        } catch (tagErr) {
-          console.error(tagErr);
-          setMessage(
-            draft
-              ? "Draft saved, but tags could not be saved."
-              : "Post published, but tags could not be saved.",
-          );
-          setTitle("");
-          setContent("");
-          setTagsInput("");
-          navigate("/Ideas");
-          setLoading(false);
-          return;
-        }
+    try {
+      if (draft) {
+        await saveDraft(post, pat);
+        setMessage("Draft saved!");
+      } else {
+        await publishPost(post, pat);
+        setMessage("Post published!");
       }
       setTitle("");
       setContent("");
       setTagsInput("");
-      setMessage(draft ? "Draft saved!" : "Post published!");
       navigate("/Ideas");
+    } catch (err) {
+      console.error(err);
+      setMessage(draft ? "Error saving draft" : "Error publishing post");
     }
 
     setLoading(false);
@@ -85,27 +62,10 @@ export default function Write() {
   async function handleImageUpload(event: React.ChangeEvent<HTMLInputElement>) {
     try {
       const file = event.target.files?.[0];
-      if (!file || !user) return;
-
-      // Create a unique file name
-      const filePath = `${user.id}/${Date.now()}-${file.name}`;
-
-      // Upload to Supabase Storage
-      const { error: uploadError } = await supabase.storage
-        .from("blogposts")
-        .upload(filePath, file);
-
-      if (uploadError) throw uploadError;
-
-      // Get public URL
-      const { data } = supabase.storage
-        .from("blogposts")
-        .getPublicUrl(filePath);
-      const imageUrl = data.publicUrl;
-
-      // Optionally insert into your Markdown editor automatically
+      if (!file || !pat) return;
+      const slug = slugify(title || "untitled");
+      const imageUrl = await uploadImage(file, slug, true, pat);
       setContent((prev) => `${prev}\n\n![image](${imageUrl})`);
-
       setMessage("✅ Image uploaded successfully!");
     } catch (err) {
       console.error(err);
@@ -123,15 +83,7 @@ export default function Write() {
         </a>
         <div className="links">
           <span className="user-info">
-            {user.email}{" "}
-            <button
-              onClick={async () => {
-                await supabase.auth.signOut();
-                setUser(null);
-              }}
-            >
-              Logout
-            </button>
+            <button onClick={() => clearPat()}>Logout</button>
           </span>
         </div>
       </div>
@@ -155,16 +107,15 @@ export default function Write() {
           aria-label="Tags"
         />
 
-        {/* Replace textarea with MDEditor */}
         <div className="md-editor">
           <MDEditor
             data-color-mode="light"
             value={content}
-            onChange={(val) => setContent(val ?? "")} // 👈 coerce undefined to empty string            height={400}
+            onChange={(val) => setContent(val ?? "")}
             textareaProps={{
               placeholder: `Write your post in Markdown...
-**Bold** 
-*Italic* 
+**Bold**
+*Italic*
 [Link](url)
 - List item`,
             }}

@@ -1,34 +1,28 @@
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { supabase } from "../../lib/supabaseClient";
 import ReactMarkdown from "react-markdown";
 import MDEditor from "@uiw/react-md-editor";
-import type { User } from "@supabase/supabase-js";
 import {
-  extractTags,
-  ensureTagIds,
-  parseTagInput,
-  POST_SELECT_WITH_TAGS,
-  type PostWithTagsRow,
-} from "../../lib/postTags";
+  fetchPublishedPost,
+  fetchDraftPost,
+  getStoredPat,
+  saveDraft,
+  publishPost,
+  deletePost,
+  uploadImage,
+  type Post,
+} from "../../lib/githubClient";
+import { parseTagInput } from "../../lib/postTags";
 import Spinner from "./Spinner";
 
-type Post = {
-  id: number;
-  title: string;
-  content: string;
-  created_at: string;
-  draft: boolean;
-} & PostWithTagsRow;
-
-const ADMIN_ID = "e0290332-fb6c-4c3b-937f-283095e3a008";
-
 export default function PostPage() {
-  const { id } = useParams<{ id: string }>();
+  const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
+  const pat = getStoredPat();
+
   const [post, setPost] = useState<Post | null>(null);
+  const [isDraft, setIsDraft] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [user, setUser] = useState<User | null>(null);
 
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState("");
@@ -36,75 +30,54 @@ export default function PostPage() {
   const [newTagInput, setNewTagInput] = useState("");
   const [tagBusy, setTagBusy] = useState(false);
 
-  // --- Fetch current user
   useEffect(() => {
-    async function getUser() {
-      const { data } = await supabase.auth.getUser();
-      setUser(data.user ?? null);
-    }
-    getUser();
-  }, []);
-
-  // --- Fetch post
-  useEffect(() => {
-    async function fetchPost() {
-      if (!id) return;
-      const { data, error } = await supabase
-        .from("posts")
-        .select(POST_SELECT_WITH_TAGS)
-        .eq("id", id)
-        .single();
-
-      if (error) console.error(error);
-      else setPost(data);
-
+    async function load() {
+      if (!slug) return;
+      setLoading(true);
+      const published = await fetchPublishedPost(slug);
+      if (published) {
+        setPost(published);
+        setIsDraft(false);
+      } else if (pat) {
+        const draft = await fetchDraftPost(slug, pat);
+        setPost(draft);
+        setIsDraft(true);
+      } else {
+        setPost(null);
+      }
       setLoading(false);
     }
-
-    fetchPost();
-  }, [id]);
-
-  async function refetchPost() {
-    if (!id) return;
-    const { data, error } = await supabase
-      .from("posts")
-      .select(POST_SELECT_WITH_TAGS)
-      .eq("id", id)
-      .single();
-    if (!error && data) setPost(data as Post);
-  }
+    load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [slug]);
 
   async function handleAddTags() {
-    if (!user || user.id !== ADMIN_ID || !post) return;
+    if (!pat || !post) return;
     const names = parseTagInput(newTagInput);
     if (!names.length) return;
     setTagBusy(true);
     try {
-      const ids = await ensureTagIds(supabase, names);
-      const rows = ids.map((tag_id) => ({ post_id: post.id, tag_id }));
-      const { error } = await supabase.from("post_tags").insert(rows);
-      if (error && error.code !== "23505") throw error;
+      const next = { ...post, tags: [...new Set([...post.tags, ...names])] };
+      if (isDraft) await saveDraft(next, pat);
+      else await publishPost(next, pat);
+      setPost(next);
       setNewTagInput("");
-      await refetchPost();
     } catch (e) {
       console.error(e);
-      alert("Could not add tags. Check RLS policies and the console.");
+      alert("Could not add tags.");
     } finally {
       setTagBusy(false);
     }
   }
 
-  async function handleRemoveTag(tagId: number) {
-    if (!user || user.id !== ADMIN_ID || !post) return;
+  async function handleRemoveTag(tag: string) {
+    if (!pat || !post) return;
     setTagBusy(true);
     try {
-      const { error } = await supabase
-        .from("post_tags")
-        .delete()
-        .eq("post_id", post.id)
-        .eq("tag_id", tagId);
-      if (error) throw error;
-      await refetchPost();
+      const next = { ...post, tags: post.tags.filter((t) => t !== tag) };
+      if (isDraft) await saveDraft(next, pat);
+      else await publishPost(next, pat);
+      setPost(next);
     } catch (e) {
       console.error(e);
       alert("Could not remove tag.");
@@ -113,63 +86,42 @@ export default function PostPage() {
     }
   }
 
-  // --- Delete post
   async function handleDelete() {
-    if (!user || user.id !== ADMIN_ID) return alert("Not authorized.");
-    const confirmed = window.confirm("Delete this post?");
-    if (!confirmed) return;
-
-    const { error } = await supabase.from("posts").delete().eq("id", post?.id);
-    if (error) console.error(error);
-    else navigate("/Ideas");
+    if (!pat || !post) return alert("Not authorized.");
+    if (!window.confirm("Delete this post?")) return;
+    try {
+      await deletePost(post.slug, isDraft, pat);
+      navigate("/Ideas");
+    } catch (e) {
+      console.error(e);
+      alert("Could not delete post.");
+    }
   }
 
-  // --- Save edited post
-  async function saveEdit(draftValue: boolean) {
-    if (!user || user.id !== ADMIN_ID) return alert("Not authorized.");
-
-    const { error } = await supabase
-      .from("posts")
-      .update({
-        title: editTitle,
-        content: editContent,
-        draft: draftValue,
-      })
-      .eq("id", post?.id);
-
-    if (error) console.error(error);
-    else {
-      setPost((prev) =>
-        prev
-          ? {
-              ...prev,
-              title: editTitle,
-              content: editContent,
-              draft: draftValue,
-            }
-          : prev
-      );
+  async function saveEdit(publish: boolean) {
+    if (!pat || !post) return alert("Not authorized.");
+    const next: Post = { ...post, title: editTitle, content: editContent };
+    try {
+      if (publish) {
+        await publishPost(next, pat);
+        setIsDraft(false);
+      } else {
+        await saveDraft(next, pat);
+        setIsDraft(true);
+      }
+      setPost(next);
       setIsEditing(false);
+    } catch (e) {
+      console.error(e);
+      alert("Could not save changes.");
     }
   }
 
   async function handleImageUpload(event: React.ChangeEvent<HTMLInputElement>) {
     try {
       const file = event.target.files?.[0];
-      if (!file || !user) return;
-
-      const filePath = `${user.id}/${Date.now()}-${file.name}`;
-      const { error: uploadError } = await supabase.storage
-        .from("blogposts")
-        .upload(filePath, file);
-
-      if (uploadError) throw uploadError;
-
-      const { data } = supabase.storage
-        .from("blogposts")
-        .getPublicUrl(filePath);
-      const imageUrl = data.publicUrl;
-
+      if (!file || !pat || !post) return;
+      const imageUrl = await uploadImage(file, post.slug, isDraft, pat);
       setEditContent((prev) => `${prev}\n\n![image](${imageUrl})`);
     } catch (err) {
       console.error(err);
@@ -179,8 +131,6 @@ export default function PostPage() {
 
   if (loading) return <Spinner label="Loading post" page />;
   if (!post) return <p>Post not found.</p>;
-
-  const postTags = extractTags(post);
 
   return (
     <div className="ideas-container">
@@ -215,28 +165,28 @@ export default function PostPage() {
               />
             </label>
 
-            <button onClick={() => saveEdit(false)}>Publish</button>
-            <button onClick={() => saveEdit(true)}>Save Draft</button>
+            <button onClick={() => saveEdit(true)}>Publish</button>
+            <button onClick={() => saveEdit(false)}>Save Draft</button>
             <button onClick={() => setIsEditing(false)}>Cancel</button>
           </div>
         </>
       ) : (
         <>
           <h1>{post.title}</h1>
-          {post.draft && <span className="draft-tag">[Draft]</span>}
+          {isDraft && <span className="draft-tag">[Draft]</span>}
           <p>{new Date(post.created_at).toLocaleDateString()}</p>
-          {postTags.length > 0 && (
+          {post.tags.length > 0 && (
             <div className="post-tags post-tags--detail" aria-label="Tags">
-              {postTags.map((t) => (
-                <span key={t.id} className="tag-pill">
-                  {t.name}
-                  {user?.id === ADMIN_ID && (
+              {post.tags.map((t) => (
+                <span key={t} className="tag-pill">
+                  {t}
+                  {pat && (
                     <button
                       type="button"
                       className="tag-pill-remove"
                       disabled={tagBusy}
-                      onClick={() => handleRemoveTag(t.id)}
-                      aria-label={`Remove tag ${t.name}`}
+                      onClick={() => handleRemoveTag(t)}
+                      aria-label={`Remove tag ${t}`}
                     >
                       ×
                     </button>
@@ -251,8 +201,7 @@ export default function PostPage() {
         </>
       )}
 
-      {/* Admin-only controls */}
-      {user && user.id === ADMIN_ID && !isEditing && (
+      {pat && !isEditing && (
         <div className="post-admin-footer">
           <div className="tag-editor">
             <input
@@ -269,11 +218,7 @@ export default function PostPage() {
                 }
               }}
             />
-            <button
-              type="button"
-              disabled={tagBusy || !newTagInput.trim()}
-              onClick={handleAddTags}
-            >
+            <button type="button" disabled={tagBusy || !newTagInput.trim()} onClick={handleAddTags}>
               Add tags
             </button>
           </div>
