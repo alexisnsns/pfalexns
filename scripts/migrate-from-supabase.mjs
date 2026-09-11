@@ -11,15 +11,24 @@
 // re-running with --apply.
 //
 // Required env vars (set these in your own shell, not committed anywhere):
-//   SUPABASE_URL, SUPABASE_ANON_KEY   — same values the old app used
-//   GITHUB_PAT                        — the fine-grained PAT for the 2 content repos
+//   SUPABASE_URL, SUPABASE_ANON_KEY        — same values the old app used
+//   SUPABASE_ADMIN_EMAIL, SUPABASE_ADMIN_PASSWORD
+//                                           — your existing admin login. RLS on
+//     `posts` blocks anonymous reads of draft rows (confirmed — the anon key
+//     alone only returns published posts), so this signs in the same way the
+//     Write UI did to also read drafts. Without these two set, only published
+//     posts are migrated.
+//   GITHUB_PAT                             — the fine-grained PAT for the 2 content repos
 //
-//   SUPABASE_URL=... SUPABASE_ANON_KEY=... GITHUB_PAT=... node scripts/migrate-from-supabase.mjs
+//   SUPABASE_URL=... SUPABASE_ANON_KEY=... SUPABASE_ADMIN_EMAIL=... SUPABASE_ADMIN_PASSWORD=... \
+//     GITHUB_PAT=... node scripts/migrate-from-supabase.mjs
 
 const APPLY = process.argv.includes("--apply");
 
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY;
+const SUPABASE_ADMIN_EMAIL = process.env.SUPABASE_ADMIN_EMAIL;
+const SUPABASE_ADMIN_PASSWORD = process.env.SUPABASE_ADMIN_PASSWORD;
 const GITHUB_PAT = process.env.GITHUB_PAT;
 
 if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
@@ -44,10 +53,29 @@ function slugify(title) {
   return base || `post-${Date.now().toString(36)}`;
 }
 
-async function fetchPosts() {
+/** Signs in the same way the old Write UI did, so RLS treats us as the admin. */
+async function getAccessToken() {
+  if (!SUPABASE_ADMIN_EMAIL || !SUPABASE_ADMIN_PASSWORD) {
+    console.warn(
+      "SUPABASE_ADMIN_EMAIL/SUPABASE_ADMIN_PASSWORD not set — only published posts will be fetched (RLS hides drafts from anon reads).\n",
+    );
+    return SUPABASE_ANON_KEY; // anon-only, same as before
+  }
+  const res = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
+    method: "POST",
+    headers: { apikey: SUPABASE_ANON_KEY, "Content-Type": "application/json" },
+    body: JSON.stringify({ email: SUPABASE_ADMIN_EMAIL, password: SUPABASE_ADMIN_PASSWORD }),
+  });
+  if (!res.ok) throw new Error(`Supabase sign-in failed: ${res.status} ${await res.text()}`);
+  const { access_token } = await res.json();
+  console.log("Signed in as admin — drafts will be included.\n");
+  return access_token;
+}
+
+async function fetchPosts(accessToken) {
   const res = await fetch(
     `${SUPABASE_URL}/rest/v1/posts?select=*,post_tags(tags(id,name,slug))&order=created_at.asc`,
-    { headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}` } },
+    { headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${accessToken}` } },
   );
   if (!res.ok) throw new Error(`Supabase fetch failed: ${res.status} ${await res.text()}`);
   return res.json();
@@ -92,7 +120,8 @@ function excerptOf(content) {
 async function main() {
   console.log(APPLY ? "Running for real — will write to GitHub.\n" : "Dry run — nothing will be written. Pass --apply to actually migrate.\n");
 
-  const rows = await fetchPosts();
+  const accessToken = await getAccessToken();
+  const rows = await fetchPosts(accessToken);
   console.log(`Found ${rows.length} post(s) in Supabase.\n`);
 
   const usedSlugs = new Set();
