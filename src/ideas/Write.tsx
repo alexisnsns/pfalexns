@@ -20,7 +20,7 @@ export default function Write() {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [tagsInput, setTagsInput] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [busy, setBusy] = useState<"draft" | "publish" | "image" | null>(null);
   const [message, setMessage] = useState("");
 
   if (!pat) return <Login />;
@@ -28,7 +28,7 @@ export default function Write() {
   async function handleSubmit(e: React.FormEvent, draft: boolean) {
     e.preventDefault();
     if (!pat) return;
-    setLoading(true);
+    setBusy(draft ? "draft" : "publish");
     setMessage("");
 
     const post = {
@@ -56,13 +56,14 @@ export default function Write() {
       setMessage(draft ? "Error saving draft" : "Error publishing post");
     }
 
-    setLoading(false);
+    setBusy(null);
   }
 
   async function handleImageUpload(event: React.ChangeEvent<HTMLInputElement>) {
     try {
       const file = event.target.files?.[0];
       if (!file || !pat) return;
+      setBusy("image");
       const slug = slugify(title || "untitled");
       const imageUrl = await uploadImage(file, slug, true, pat);
       setContent((prev) => `${prev}\n\n![image](${imageUrl})`);
@@ -70,6 +71,9 @@ export default function Write() {
     } catch (err) {
       console.error(err);
       setMessage("❌ Image upload failed");
+    } finally {
+      setBusy(null);
+      event.target.value = "";
     }
   }
 
@@ -124,10 +128,11 @@ export default function Write() {
 
         <div className="button-group">
           <label className="upload-button">
-            📸 Upload Image
+            {busy === "image" ? "Uploading..." : "📸 Upload Image"}
             <input
               type="file"
               accept="image/*"
+              disabled={!!busy}
               onChange={handleImageUpload}
               style={{ display: "none" }}
             />
@@ -135,20 +140,20 @@ export default function Write() {
 
           <button
             type="button"
-            disabled={loading}
+            disabled={!!busy}
             className="post-button draft-button"
             onClick={(e) => handleSubmit(e, true)}
           >
-            {loading ? "Saving..." : "Save Draft"}
+            {busy === "draft" ? "Saving..." : "Save Draft"}
           </button>
 
           <button
             type="button"
-            disabled={loading}
+            disabled={!!busy}
             className="post-button publish-button"
             onClick={(e) => handleSubmit(e, false)}
           >
-            {loading ? "Publishing..." : "Publish Publicly"}
+            {busy === "publish" ? "Publishing..." : "Publish Publicly"}
           </button>
         </div>
       </form>

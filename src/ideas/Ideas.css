@@ -351,3 +351,9 @@
   opacity: 0.5;
   cursor: not-allowed;
 }
+
+.ideas-container button:disabled,
+.upload-button:has(input:disabled) {
+  opacity: 0.6;
+  cursor: wait;
+}

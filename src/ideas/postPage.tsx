@@ -28,7 +28,8 @@ export default function PostPage() {
   const [editTitle, setEditTitle] = useState("");
   const [editContent, setEditContent] = useState("");
   const [newTagInput, setNewTagInput] = useState("");
-  const [tagBusy, setTagBusy] = useState(false);
+  // which slow GitHub write is in flight, so buttons can show progress
+  const [busy, setBusy] = useState<string | null>(null);
 
   useEffect(() => {
     async function load() {
@@ -55,7 +56,7 @@ export default function PostPage() {
     if (!pat || !post) return;
     const names = parseTagInput(newTagInput);
     if (!names.length) return;
-    setTagBusy(true);
+    setBusy("tags");
     try {
       const next = { ...post, tags: [...new Set([...post.tags, ...names])] };
       if (isDraft) await saveDraft(next, pat);
@@ -66,13 +67,13 @@ export default function PostPage() {
       console.error(e);
       alert("Could not add tags.");
     } finally {
-      setTagBusy(false);
+      setBusy(null);
     }
   }
 
   async function handleRemoveTag(tag: string) {
     if (!pat || !post) return;
-    setTagBusy(true);
+    setBusy("tags");
     try {
       const next = { ...post, tags: post.tags.filter((t) => t !== tag) };
       if (isDraft) await saveDraft(next, pat);
@@ -82,25 +83,28 @@ export default function PostPage() {
       console.error(e);
       alert("Could not remove tag.");
     } finally {
-      setTagBusy(false);
+      setBusy(null);
     }
   }
 
   async function handleDelete() {
     if (!pat || !post) return alert("Not authorized.");
     if (!window.confirm("Delete this post?")) return;
+    setBusy("delete");
     try {
       await deletePost(post.slug, isDraft, pat);
       navigate("/Ideas");
     } catch (e) {
       console.error(e);
       alert("Could not delete post.");
+      setBusy(null);
     }
   }
 
   async function saveEdit(publish: boolean) {
     if (!pat || !post) return alert("Not authorized.");
     const next: Post = { ...post, title: editTitle, content: editContent };
+    setBusy(publish ? "publish" : "draft");
     try {
       if (publish) {
         await publishPost(next, pat);
@@ -114,6 +118,8 @@ export default function PostPage() {
     } catch (e) {
       console.error(e);
       alert("Could not save changes.");
+    } finally {
+      setBusy(null);
     }
   }
 
@@ -121,11 +127,15 @@ export default function PostPage() {
     try {
       const file = event.target.files?.[0];
       if (!file || !pat || !post) return;
+      setBusy("image");
       const imageUrl = await uploadImage(file, post.slug, isDraft, pat);
       setEditContent((prev) => `${prev}\n\n![image](${imageUrl})`);
     } catch (err) {
       console.error(err);
       alert("❌ Image upload failed");
+    } finally {
+      setBusy(null);
+      event.target.value = "";
     }
   }
 
@@ -156,18 +166,25 @@ export default function PostPage() {
 
           <div className="edit-buttons">
             <label className="upload-button">
-              📸 Upload Image
+              {busy === "image" ? "Uploading..." : "📸 Upload Image"}
               <input
                 type="file"
                 accept="image/*"
+                disabled={!!busy}
                 onChange={handleImageUpload}
                 style={{ display: "none" }}
               />
             </label>
 
-            <button onClick={() => saveEdit(true)}>Publish</button>
-            <button onClick={() => saveEdit(false)}>Save Draft</button>
-            <button onClick={() => setIsEditing(false)}>Cancel</button>
+            <button disabled={!!busy} onClick={() => saveEdit(true)}>
+              {busy === "publish" ? "Publishing..." : "Publish"}
+            </button>
+            <button disabled={!!busy} onClick={() => saveEdit(false)}>
+              {busy === "draft" ? "Saving..." : "Save Draft"}
+            </button>
+            <button disabled={!!busy} onClick={() => setIsEditing(false)}>
+              Cancel
+            </button>
           </div>
         </>
       ) : (
@@ -184,7 +201,7 @@ export default function PostPage() {
                     <button
                       type="button"
                       className="tag-pill-remove"
-                      disabled={tagBusy}
+                      disabled={!!busy}
                       onClick={() => handleRemoveTag(t)}
                       aria-label={`Remove tag ${t}`}
                     >
@@ -209,7 +226,7 @@ export default function PostPage() {
               className="tag-editor-input"
               placeholder="Add tags (comma-separated)"
               value={newTagInput}
-              disabled={tagBusy}
+              disabled={!!busy}
               onChange={(e) => setNewTagInput(e.target.value)}
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
@@ -218,12 +235,13 @@ export default function PostPage() {
                 }
               }}
             />
-            <button type="button" disabled={tagBusy || !newTagInput.trim()} onClick={handleAddTags}>
-              Add tags
+            <button type="button" disabled={!!busy || !newTagInput.trim()} onClick={handleAddTags}>
+              {busy === "tags" ? "Saving..." : "Add tags"}
             </button>
           </div>
           <div className="post-actions">
             <button
+              disabled={!!busy}
               onClick={() => {
                 setEditTitle(post.title);
                 setEditContent(post.content);
@@ -232,7 +250,9 @@ export default function PostPage() {
             >
               Edit
             </button>
-            <button onClick={handleDelete}>Delete</button>
+            <button disabled={!!busy} onClick={handleDelete}>
+              {busy === "delete" ? "Deleting..." : "Delete"}
+            </button>
           </div>
         </div>
       )}
