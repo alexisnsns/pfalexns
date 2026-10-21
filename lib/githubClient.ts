@@ -305,13 +305,16 @@ async function migrateDraftImages(content: string, slug: string, pat: string): P
   let updated = content;
   for (const match of matches) {
     const path = decodeURIComponent(match[1]);
+    // no-store + explicit JSON Accept: MarkdownImage fetched this same URL as raw bytes,
+    // and the browser cache would otherwise hand back the JPEG instead of JSON.
     const res = await fetch(`${draftPrefix}${match[1]}?ref=${BRANCH}`, {
-      headers: { Authorization: `token ${pat}` },
+      headers: { Authorization: `token ${pat}`, Accept: "application/vnd.github.v3+json" },
+      cache: "no-store",
     });
     if (!res.ok) continue;
     const json = await res.json();
     const newPath = path.startsWith("images/") ? `images/${slug}/${path.split("/").pop()}` : path;
-    await fetch(`${GITHUB_API}/repos/${POSTS_REPO.owner}/${POSTS_REPO.repo}/contents/${newPath}`, {
+    const put = await fetch(`${GITHUB_API}/repos/${POSTS_REPO.owner}/${POSTS_REPO.repo}/contents/${newPath}`, {
       method: "PUT",
       headers: { Authorization: `token ${pat}`, "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -320,6 +323,10 @@ async function migrateDraftImages(content: string, slug: string, pat: string): P
         branch: BRANCH,
       }),
     });
+    // 422 = already in the public repo (earlier publish attempt) — fine to reuse
+    if (!put.ok && put.status !== 422) {
+      throw new Error(`Image publish failed (${put.status}): ${await put.text()}`);
+    }
     purgeJsdelivr(newPath);
     const publicUrl = `${JSDELIVR_BASE}/${POSTS_REPO.owner}/${POSTS_REPO.repo}@${BRANCH}/${newPath}`;
     updated = updated.split(match[0]).join(publicUrl);
@@ -421,6 +428,7 @@ export function isDraftImageUrl(src: string): boolean {
 export async function fetchDraftImageBlobUrl(src: string, pat: string): Promise<string> {
   const res = await fetch(src, {
     headers: { Authorization: `token ${pat}`, Accept: "application/vnd.github.raw" },
+    cache: "no-store",
   });
   if (!res.ok) throw new Error(`Draft image fetch failed (${res.status})`);
   return URL.createObjectURL(await res.blob());
