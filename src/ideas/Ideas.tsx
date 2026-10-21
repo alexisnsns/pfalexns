@@ -10,6 +10,7 @@ import "./Ideas.css";
 import ReactMarkdown from "react-markdown";
 import { Link } from "react-router-dom";
 import Spinner from "./Spinner";
+import MarkdownImage from "./MarkdownImage";
 
 type IndexPost = Pick<Post, "slug" | "title" | "created_at" | "tags"> & {
   excerpt: string;
@@ -181,7 +182,7 @@ export default function Ideas() {
 
               {post.excerpt && (
                 <div className="post-content markdown-body">
-                  <ReactMarkdown>{post.excerpt}</ReactMarkdown>
+                  <ReactMarkdown components={{ img: MarkdownImage }}>{post.excerpt}</ReactMarkdown>
                 </div>
               )}
 

@@ -12,6 +12,7 @@ import "./Ideas.css";
 import { useNavigate } from "react-router-dom";
 import MDEditor from "@uiw/react-md-editor";
 import { parseTagInput } from "../../lib/postTags";
+import MarkdownImage from "./MarkdownImage";
 
 export default function Write() {
   const navigate = useNavigate();
@@ -113,6 +114,7 @@ export default function Write() {
 
         <div className="md-editor">
           <MDEditor
+            previewOptions={{ components: { img: MarkdownImage } }}
             data-color-mode="light"
             value={content}
             onChange={(val) => setContent(val ?? "")}

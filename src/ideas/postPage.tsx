@@ -14,6 +14,7 @@ import {
 } from "../../lib/githubClient";
 import { parseTagInput } from "../../lib/postTags";
 import Spinner from "./Spinner";
+import MarkdownImage from "./MarkdownImage";
 
 export default function PostPage() {
   const { slug } = useParams<{ slug: string }>();
@@ -158,6 +159,7 @@ export default function PostPage() {
           />
 
           <MDEditor
+            previewOptions={{ components: { img: MarkdownImage } }}
             data-color-mode="light"
             value={editContent}
             onChange={(val) => setEditContent(val ?? "")}
@@ -213,7 +215,7 @@ export default function PostPage() {
             </div>
           )}
           <div className="post-content markdown-body">
-            <ReactMarkdown>{post.content}</ReactMarkdown>
+            <ReactMarkdown components={{ img: MarkdownImage }}>{post.content}</ReactMarkdown>
           </div>
         </>
       )}

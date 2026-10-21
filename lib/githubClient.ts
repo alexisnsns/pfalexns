@@ -410,3 +410,18 @@ export function slugify(title: string): string {
     .replace(/[^a-z0-9-]/g, "");
   return base || `post-${Date.now().toString(36)}`;
 }
+
+const DRAFT_IMAGE_PREFIX = `${GITHUB_API}/repos/${DRAFTS_REPO.owner}/${DRAFTS_REPO.repo}/contents/`;
+
+export function isDraftImageUrl(src: string): boolean {
+  return src.startsWith(DRAFT_IMAGE_PREFIX);
+}
+
+/** Draft image URLs need the PAT, which <img> can't send — fetch raw bytes and return a blob URL. */
+export async function fetchDraftImageBlobUrl(src: string, pat: string): Promise<string> {
+  const res = await fetch(src, {
+    headers: { Authorization: `token ${pat}`, Accept: "application/vnd.github.raw" },
+  });
+  if (!res.ok) throw new Error(`Draft image fetch failed (${res.status})`);
+  return URL.createObjectURL(await res.blob());
+}
