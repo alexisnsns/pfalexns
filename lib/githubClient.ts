@@ -200,10 +200,8 @@ async function putFile(
   message: string,
   pat: string,
 ): Promise<void> {
-  const sha = await getSha(target, path, pat);
-  const res = await fetch(
-    `${GITHUB_API}/repos/${target.owner}/${target.repo}/contents/${path}`,
-    {
+  const attempt = (sha: string | undefined) =>
+    fetch(`${GITHUB_API}/repos/${target.owner}/${target.repo}/contents/${path}`, {
       method: "PUT",
       headers: {
         Authorization: `token ${pat}`,
@@ -215,8 +213,13 @@ async function putFile(
         sha,
         branch: BRANCH,
       }),
-    },
-  );
+    });
+
+  let res = await attempt(await getSha(target, path, pat));
+  if (res.status === 409) {
+    // sha went stale between the GET and this PUT (e.g. overlapping writes) — refetch and retry once
+    res = await attempt(await getSha(target, path, pat));
+  }
   if (!res.ok) {
     throw new Error(`GitHub write failed (${res.status}): ${await res.text()}`);
   }
