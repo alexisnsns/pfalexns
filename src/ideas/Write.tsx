@@ -157,7 +157,7 @@ export default function Write() {
             className="post-button draft-button"
             onClick={(e) => handleSubmit(e, true)}
           >
-            {busy === "draft" ? "Saving..." : "Save Draft"}
+            {busy === "draft" ? "Saving..." : isPrivate ? "Save Private" : "Save Draft"}
           </button>
 
           {!isPrivate && (

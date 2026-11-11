@@ -194,7 +194,7 @@ export default function PostPage() {
               </button>
             )}
             <button disabled={!!busy} onClick={() => saveEdit(false)}>
-              {busy === "draft" ? "Saving..." : "Save Draft"}
+              {busy === "draft" ? "Saving..." : editPrivate ? "Save Private" : "Save Draft"}
             </button>
             <button disabled={!!busy} onClick={() => setIsEditing(false)}>
               Cancel

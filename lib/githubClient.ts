@@ -220,8 +220,10 @@ async function putFile(
     });
 
   let res = await attempt(await getSha(target, path, pat));
-  if (res.status === 409) {
-    // sha went stale between the GET and this PUT (e.g. overlapping writes) — refetch and retry once
+  // sha can go stale between the GET and this PUT (overlapping writes, or GitHub's read
+  // replica lagging just behind a write we made moments ago) — refetch and retry a few times
+  for (let i = 0; res.status === 409 && i < 3; i++) {
+    await new Promise((r) => setTimeout(r, 400));
     res = await attempt(await getSha(target, path, pat));
   }
   if (!res.ok) {
