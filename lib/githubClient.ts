@@ -20,9 +20,13 @@ export type Post = {
   content: string;
   created_at: string;
   tags: string[];
+  // Never meant to be published (e.g. reading notes) — publishPost refuses these.
+  private?: boolean;
 };
 
-type IndexEntry = Pick<Post, "slug" | "title" | "created_at" | "tags"> & { excerpt: string };
+type IndexEntry = Pick<Post, "slug" | "title" | "created_at" | "tags" | "private"> & {
+  excerpt: string;
+};
 
 function excerptOf(content: string): string {
   return content.length > 200 ? content.slice(0, 200) + "..." : content;
@@ -338,8 +342,8 @@ async function migrateDraftImages(content: string, slug: string, pat: string): P
 }
 
 function toIndexEntry(post: Post): IndexEntry {
-  const { slug, title, created_at, tags, content } = post;
-  return { slug, title, created_at, tags, excerpt: excerptOf(content) };
+  const { slug, title, created_at, tags, content, private: isPrivate } = post;
+  return { slug, title, created_at, tags, private: isPrivate, excerpt: excerptOf(content) };
 }
 
 /** Saves a draft (create or update) in pfalexns-drafts. */
@@ -353,6 +357,7 @@ export async function saveDraft(post: Post, pat: string): Promise<void> {
  * it, then removes it from pfalexns-drafts if it was there.
  */
 export async function publishPost(postIn: Post, pat: string): Promise<void> {
+  if (postIn.private) throw new Error("This note is marked private and can't be published.");
   const post = { ...postIn, content: await migrateDraftImages(postIn.content, postIn.slug, pat) };
   await putFile(POSTS_REPO, `posts/${post.slug}.json`, post, `Publish: ${post.title}`, pat);
   await upsertIndexEntry(POSTS_REPO, toIndexEntry(post), pat);

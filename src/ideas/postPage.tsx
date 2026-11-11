@@ -28,6 +28,7 @@ export default function PostPage() {
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState("");
   const [editContent, setEditContent] = useState("");
+  const [editPrivate, setEditPrivate] = useState(false);
   const [newTagInput, setNewTagInput] = useState("");
   // which slow GitHub write is in flight, so buttons can show progress
   const [busy, setBusy] = useState<string | null>(null);
@@ -104,7 +105,7 @@ export default function PostPage() {
 
   async function saveEdit(publish: boolean) {
     if (!pat || !post) return alert("Not authorized.");
-    const next: Post = { ...post, title: editTitle, content: editContent };
+    const next: Post = { ...post, title: editTitle, content: editContent, private: editPrivate };
     setBusy(publish ? "publish" : "draft");
     try {
       if (publish) {
@@ -166,6 +167,15 @@ export default function PostPage() {
             height={300}
           />
 
+          <label className="private-checkbox">
+            <input
+              type="checkbox"
+              checked={editPrivate}
+              onChange={(e) => setEditPrivate(e.target.checked)}
+            />
+            Keep private (never publish — just for me)
+          </label>
+
           <div className="edit-buttons">
             <label className="upload-button">
               {busy === "image" ? "Uploading..." : "📸 Upload Image"}
@@ -178,9 +188,11 @@ export default function PostPage() {
               />
             </label>
 
-            <button disabled={!!busy} onClick={() => saveEdit(true)}>
-              {busy === "publish" ? "Publishing..." : "Publish"}
-            </button>
+            {!editPrivate && (
+              <button disabled={!!busy} onClick={() => saveEdit(true)}>
+                {busy === "publish" ? "Publishing..." : "Publish"}
+              </button>
+            )}
             <button disabled={!!busy} onClick={() => saveEdit(false)}>
               {busy === "draft" ? "Saving..." : "Save Draft"}
             </button>
@@ -193,6 +205,7 @@ export default function PostPage() {
         <>
           <h1>{post.title}</h1>
           {isDraft && <span className="draft-tag">[Draft]</span>}
+          {post.private && <span className="private-tag">[Private]</span>}
           <p>{new Date(post.created_at).toLocaleDateString()}</p>
           {post.tags.length > 0 && (
             <div className="post-tags post-tags--detail" aria-label="Tags">
@@ -247,6 +260,7 @@ export default function PostPage() {
               onClick={() => {
                 setEditTitle(post.title);
                 setEditContent(post.content);
+                setEditPrivate(!!post.private);
                 setIsEditing(true);
               }}
             >

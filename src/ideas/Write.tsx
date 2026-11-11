@@ -21,6 +21,7 @@ export default function Write() {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [tagsInput, setTagsInput] = useState("");
+  const [isPrivate, setIsPrivate] = useState(false);
   const [busy, setBusy] = useState<"draft" | "publish" | "image" | null>(null);
   const [message, setMessage] = useState("");
 
@@ -38,6 +39,7 @@ export default function Write() {
       content,
       created_at: new Date().toISOString(),
       tags: parseTagInput(tagsInput),
+      private: isPrivate,
     };
 
     try {
@@ -128,6 +130,15 @@ export default function Write() {
           />
         </div>
 
+        <label className="private-checkbox">
+          <input
+            type="checkbox"
+            checked={isPrivate}
+            onChange={(e) => setIsPrivate(e.target.checked)}
+          />
+          Keep private (never publish — just for me)
+        </label>
+
         <div className="button-group">
           <label className="upload-button">
             {busy === "image" ? "Uploading..." : "📸 Upload Image"}
@@ -149,14 +160,16 @@ export default function Write() {
             {busy === "draft" ? "Saving..." : "Save Draft"}
           </button>
 
-          <button
-            type="button"
-            disabled={!!busy}
-            className="post-button publish-button"
-            onClick={(e) => handleSubmit(e, false)}
-          >
-            {busy === "publish" ? "Publishing..." : "Publish Publicly"}
-          </button>
+          {!isPrivate && (
+            <button
+              type="button"
+              disabled={!!busy}
+              className="post-button publish-button"
+              onClick={(e) => handleSubmit(e, false)}
+            >
+              {busy === "publish" ? "Publishing..." : "Publish Publicly"}
+            </button>
+          )}
         </div>
       </form>
 

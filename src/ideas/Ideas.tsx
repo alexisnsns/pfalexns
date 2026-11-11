@@ -12,7 +12,7 @@ import { Link } from "react-router-dom";
 import Spinner from "./Spinner";
 import MarkdownImage from "./MarkdownImage";
 
-type IndexPost = Pick<Post, "slug" | "title" | "created_at" | "tags"> & {
+type IndexPost = Pick<Post, "slug" | "title" | "created_at" | "tags" | "private"> & {
   excerpt: string;
   draft: boolean;
 };
@@ -167,7 +167,8 @@ export default function Ideas() {
           <article key={post.slug} className="post-item">
             <Link to={`/Ideas/${post.slug}`} style={{ textDecoration: "none", color: "inherit" }}>
               <h2 className="post-title">
-                {post.title} {post.draft && <span className="draft-tag">[Draft]</span>}
+                {post.title} {post.draft && <span className="draft-tag">[Draft]</span>}{" "}
+                {post.private && <span className="private-tag">[Private]</span>}
               </h2>
 
               {post.tags.length > 0 && (
