@@ -204,7 +204,7 @@ export default function PostPage() {
       ) : (
         <>
           <h1>{post.title}</h1>
-          {isDraft && <span className="draft-tag">[Draft]</span>}
+          {isDraft && !post.private && <span className="draft-tag">[Draft]</span>}
           {post.private && <span className="private-tag">[Private]</span>}
           <p>{new Date(post.created_at).toLocaleDateString()}</p>
           {post.tags.length > 0 && (

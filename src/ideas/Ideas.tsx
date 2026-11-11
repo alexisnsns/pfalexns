@@ -17,7 +17,7 @@ type IndexPost = Pick<Post, "slug" | "title" | "created_at" | "tags" | "private"
   draft: boolean;
 };
 
-type IdeasFilter = "published" | "drafts";
+type IdeasFilter = "published" | "drafts" | "private";
 
 export default function Ideas() {
   const [posts, setPosts] = useState<IndexPost[]>([]);
@@ -50,7 +50,9 @@ export default function Ideas() {
 
   const draftFilteredPosts = useMemo(() => {
     if (!pat) return posts.filter((p) => !p.draft);
-    return posts.filter((p) => (ideasFilter === "published" ? !p.draft : p.draft));
+    if (ideasFilter === "published") return posts.filter((p) => !p.draft);
+    if (ideasFilter === "private") return posts.filter((p) => p.private);
+    return posts.filter((p) => p.draft && !p.private);
   }, [posts, pat, ideasFilter]);
 
   const availableTags = useMemo(() => {
@@ -131,6 +133,17 @@ export default function Ideas() {
           >
             Drafts
           </button>
+          <button
+            type="button"
+            className={
+              ideasFilter === "private"
+                ? "ideas-filter-btn ideas-filter-btn--active"
+                : "ideas-filter-btn"
+            }
+            onClick={() => setIdeasFilter("private")}
+          >
+            Private
+          </button>
         </div>
       )}
 
@@ -167,7 +180,8 @@ export default function Ideas() {
           <article key={post.slug} className="post-item">
             <Link to={`/Ideas/${post.slug}`} style={{ textDecoration: "none", color: "inherit" }}>
               <h2 className="post-title">
-                {post.title} {post.draft && <span className="draft-tag">[Draft]</span>}{" "}
+                {post.title}{" "}
+                {post.draft && !post.private && <span className="draft-tag">[Draft]</span>}{" "}
                 {post.private && <span className="private-tag">[Private]</span>}
               </h2>
 
@@ -201,7 +215,9 @@ export default function Ideas() {
               ? "No posts yet. Stay tuned!"
               : ideasFilter === "drafts"
                 ? "No drafts."
-                : "No published posts."}
+                : ideasFilter === "private"
+                  ? "No private notes."
+                  : "No published posts."}
         </p>
       )}
     </div>
