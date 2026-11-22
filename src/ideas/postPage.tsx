@@ -212,17 +212,6 @@ export default function PostPage() {
               {post.tags.map((t) => (
                 <span key={t} className="tag-pill">
                   {t}
-                  {pat && (
-                    <button
-                      type="button"
-                      className="tag-pill-remove"
-                      disabled={!!busy}
-                      onClick={() => handleRemoveTag(t)}
-                      aria-label={`Remove tag ${t}`}
-                    >
-                      ×
-                    </button>
-                  )}
                 </span>
               ))}
             </div>
@@ -253,6 +242,26 @@ export default function PostPage() {
             <button type="button" disabled={!!busy || !newTagInput.trim()} onClick={handleAddTags}>
               {busy === "tags" ? "Saving..." : "Add tags"}
             </button>
+          </div>
+          <div className="post-tags post-tags--editor" aria-label="Current tags">
+            {post.tags.length === 0 ? (
+              <span className="tag-editor-empty">No tags yet</span>
+            ) : (
+              post.tags.map((t) => (
+                <span key={t} className="tag-pill">
+                  {t}
+                  <button
+                    type="button"
+                    className="tag-pill-remove"
+                    disabled={!!busy}
+                    onClick={() => handleRemoveTag(t)}
+                    aria-label={`Remove tag ${t}`}
+                  >
+                    ×
+                  </button>
+                </span>
+              ))
+            )}
           </div>
           <div className="post-actions">
             <button

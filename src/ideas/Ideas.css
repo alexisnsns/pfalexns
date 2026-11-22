@@ -298,6 +298,16 @@
   justify-content: center;
 }
 
+.post-tags--editor {
+  justify-content: center;
+  margin: -0.25rem 0 0;
+}
+
+.tag-editor-empty {
+  font-size: 0.8rem;
+  color: #9ca3af;
+}
+
 .tag-pill {
   display: inline-flex;
   align-items: center;

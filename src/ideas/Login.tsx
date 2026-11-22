@@ -15,7 +15,7 @@ export default function Login() {
     setLoading(true);
     try {
       await unlockWithPassphrase(passphrase);
-      navigate("/Write");
+      navigate("/Ideas");
     } catch (err) {
       setMessage(err instanceof Error ? err.message : "Could not unlock.");
     } finally {
