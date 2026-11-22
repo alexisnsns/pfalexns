@@ -348,10 +348,23 @@ function toIndexEntry(post: Post): IndexEntry {
   return { slug, title, created_at, tags, private: isPrivate, excerpt: excerptOf(content) };
 }
 
-/** Saves a draft (create or update) in pfalexns-drafts. */
+/**
+ * Saves a draft (create or update) in pfalexns-drafts. A slug lives in exactly
+ * one repo, so if the post is currently published it's removed from
+ * pfalexns-posts (i.e. saving a published post as a draft unpublishes it) —
+ * the mirror of publishPost removing the draft.
+ */
 export async function saveDraft(post: Post, pat: string): Promise<void> {
   await putFile(DRAFTS_REPO, `posts/${post.slug}.json`, post, `Save draft: ${post.title}`, pat);
   await upsertIndexEntry(DRAFTS_REPO, toIndexEntry(post), pat);
+
+  const publishedSha = await getSha(POSTS_REPO, `posts/${post.slug}.json`, pat);
+  if (publishedSha) {
+    await deleteFile(POSTS_REPO, `posts/${post.slug}.json`, `Unpublish ${post.slug}`, pat);
+    await removeIndexEntry(POSTS_REPO, post.slug, pat);
+    purgeJsdelivr(`posts/${post.slug}.json`);
+    purgeJsdelivr("posts/index.json");
+  }
 }
 
 /**
@@ -383,6 +396,19 @@ export async function deletePost(slug: string, isDraft: boolean, pat: string): P
   }
 }
 
+/**
+ * Base64-encodes bytes in chunks. Spreading a whole file into
+ * String.fromCharCode(...) overflows the call stack for anything over ~100KB.
+ */
+function bytesToBase64(bytes: Uint8Array): string {
+  let binary = "";
+  const CHUNK = 0x8000;
+  for (let i = 0; i < bytes.length; i += CHUNK) {
+    binary += String.fromCharCode(...bytes.subarray(i, i + CHUNK));
+  }
+  return btoa(binary);
+}
+
 /** Uploads an image (as base64) and returns its public/authenticated URL. */
 export async function uploadImage(
   file: File,
@@ -394,7 +420,7 @@ export async function uploadImage(
   const path = `images/${slug}/${Date.now()}-${file.name}`;
 
   const buffer = await file.arrayBuffer();
-  const b64 = btoa(String.fromCharCode(...new Uint8Array(buffer)));
+  const b64 = bytesToBase64(new Uint8Array(buffer));
 
   const res = await fetch(
     `${GITHUB_API}/repos/${target.owner}/${target.repo}/contents/${path}`,
