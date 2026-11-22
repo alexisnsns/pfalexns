@@ -202,10 +202,13 @@ function encodeContent(contentObj: unknown): string {
   return btoa(unescape(encodeURIComponent(str)));
 }
 
+// Every read that feeds a write must bypass the browser cache: the Contents API
+// sends max-age=60, so a cached GET returns the sha from before our last write
+// and the PUT 409s ("does not match <sha>") — retries included.
 async function getSha(target: RepoRef, path: string, pat: string): Promise<string | undefined> {
   const res = await fetch(
     `${GITHUB_API}/repos/${target.owner}/${target.repo}/contents/${path}?ref=${BRANCH}`,
-    { headers: { Authorization: `token ${pat}` } },
+    { headers: { Authorization: `token ${pat}` }, cache: "no-store" },
   );
   if (!res.ok) return undefined;
   const json = await res.json();
@@ -283,7 +286,7 @@ async function upsertIndexEntry(target: RepoRef, entry: IndexEntry, pat: string)
   if (sha) {
     const res = await fetch(
       `${GITHUB_API}/repos/${target.owner}/${target.repo}/contents/posts/index.json?ref=${BRANCH}`,
-      { headers: { Authorization: `token ${pat}` } },
+      { headers: { Authorization: `token ${pat}` }, cache: "no-store" },
     );
     if (res.ok) index = JSON.parse(decodeContentsFile(await res.json()));
   }
@@ -295,7 +298,7 @@ async function upsertIndexEntry(target: RepoRef, entry: IndexEntry, pat: string)
 async function removeIndexEntry(target: RepoRef, slug: string, pat: string): Promise<void> {
   const res = await fetch(
     `${GITHUB_API}/repos/${target.owner}/${target.repo}/contents/posts/index.json?ref=${BRANCH}`,
-    { headers: { Authorization: `token ${pat}` } },
+    { headers: { Authorization: `token ${pat}` }, cache: "no-store" },
   );
   if (!res.ok) return;
   const index: IndexEntry[] = JSON.parse(decodeContentsFile(await res.json()));
