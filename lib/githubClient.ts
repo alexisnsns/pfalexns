@@ -124,25 +124,40 @@ export async function unlockWithPassphrase(passphrase: string): Promise<void> {
 }
 
 // ---------------------------------------------------------------------------
-// Reads — public posts via jsDelivr (fast, cached, no auth, no rate limit
-// concerns). Drafts via the authenticated GitHub API (private repo).
+// Reads — public posts via raw.githubusercontent.com (no auth, CORS-enabled,
+// at most ~5 min stale, no purge needed). Not jsDelivr: its @branch cache can
+// hold a mutable file like posts/index.json for hours, and purges of the same
+// path get throttled after a few publishes, so new posts/titles went missing.
+// With the PAT (the author) reads go through the API so they're always fresh
+// — important since the editor starts from whatever was read.
+// Drafts via the authenticated GitHub API (private repo).
 // ---------------------------------------------------------------------------
 
-async function jsdelivrJson<T>(path: string): Promise<T | null> {
-  const res = await fetch(
-    `${JSDELIVR_BASE}/${POSTS_REPO.owner}/${POSTS_REPO.repo}@${BRANCH}/${path}`,
-    { cache: "no-store" },
-  );
+const RAW_BASE = "https://raw.githubusercontent.com";
+
+async function publishedJson<T>(path: string): Promise<T | null> {
+  const pat = getStoredPat();
+  const res = pat
+    ? await fetch(
+        `${GITHUB_API}/repos/${POSTS_REPO.owner}/${POSTS_REPO.repo}/contents/${path}?ref=${BRANCH}`,
+        {
+          headers: { Authorization: `token ${pat}`, Accept: "application/vnd.github.raw+json" },
+          cache: "no-store",
+        },
+      )
+    : await fetch(`${RAW_BASE}/${POSTS_REPO.owner}/${POSTS_REPO.repo}/${BRANCH}/${path}`, {
+        cache: "no-store",
+      });
   if (!res.ok) return null;
   return res.json();
 }
 
 export async function fetchPublishedIndex(): Promise<IndexEntry[]> {
-  return (await jsdelivrJson<IndexEntry[]>("posts/index.json")) ?? [];
+  return (await publishedJson<IndexEntry[]>("posts/index.json")) ?? [];
 }
 
 export async function fetchPublishedPost(slug: string): Promise<Post | null> {
-  return jsdelivrJson<Post>(`posts/${encodeURIComponent(slug)}.json`);
+  return publishedJson<Post>(`posts/${encodeURIComponent(slug)}.json`);
 }
 
 async function draftsGet(path: string, pat: string): Promise<Response> {
