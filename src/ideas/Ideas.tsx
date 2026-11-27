@@ -11,6 +11,7 @@ import ReactMarkdown from "react-markdown";
 import { Link } from "react-router-dom";
 import Spinner from "./Spinner";
 import MarkdownImage from "./MarkdownImage";
+import Masthead from "../Masthead";
 
 type IndexPost = Pick<Post, "slug" | "title" | "created_at" | "tags" | "private"> & {
   excerpt: string;
@@ -80,34 +81,20 @@ export default function Ideas() {
 
   return (
     <div className="ideas-container">
-      <h1 className="ideas-title">Ideas</h1>
-
-      <div className="ideas-nav">
-        <div className="links">
-          <Link to="/" style={styles.link}>
-            /Main
-          </Link>
-        </div>
-
+      <Masthead>
         {pat ? (
-          <div className="user-info">
-            <button
-              onClick={() => {
-                clearPat();
-              }}
-            >
-              Logout
+          <>
+            <Link to="/Write">Write</Link>
+            <button type="button" onClick={() => clearPat()}>
+              Log out
             </button>
-            <Link to="/Write" style={styles.link}>
-              /Write
-            </Link>
-          </div>
+          </>
         ) : (
-          <Link to="/Login" style={styles.link}>
-            /Login
-          </Link>
+          <Link to="/Login">Log in</Link>
         )}
-      </div>
+      </Masthead>
+
+      <h1 className="ideas-title">Ideas</h1>
 
       {pat && (
         <div className="ideas-filter" role="group" aria-label="Show posts">
@@ -148,9 +135,20 @@ export default function Ideas() {
       )}
 
       {!loading && availableTags.length > 0 && (
-        <div className="ideas-tag-filter" aria-label="Filter by tag">
-          <span className="ideas-tag-filter-label">Tags</span>
-          <div className="ideas-tag-filter-chips" role="group">
+        <div className="ideas-tag-filter">
+          <div className="ideas-tag-filter-chips" role="group" aria-label="Filter by tag">
+            <button
+              type="button"
+              className={
+                selectedTagSet.size === 0
+                  ? "ideas-tag-filter-chip ideas-tag-filter-chip--selected"
+                  : "ideas-tag-filter-chip"
+              }
+              aria-pressed={selectedTagSet.size === 0}
+              onClick={() => setSelectedTags([])}
+            >
+              All
+            </button>
             {availableTags.map((t) => {
               const selected = selectedTagSet.has(t);
               return (
@@ -178,30 +176,27 @@ export default function Ideas() {
       <div className="posts-list">
         {visiblePosts.map((post) => (
           <article key={post.slug} className="post-item">
-            <Link to={`/Ideas/${post.slug}`} style={{ textDecoration: "none", color: "inherit" }}>
+            <Link to={`/Ideas/${post.slug}`} className="post-link">
               <h2 className="post-title">
                 {post.title}{" "}
-                {post.draft && !post.private && <span className="draft-tag">[Draft]</span>}{" "}
-                {post.private && <span className="private-tag">[Private]</span>}
+                {post.draft && !post.private && <span className="draft-tag">Draft</span>}{" "}
+                {post.private && <span className="private-tag">Private</span>}
               </h2>
 
-              {post.tags.length > 0 && (
-                <div className="post-tags" aria-label="Tags">
-                  {post.tags.map((t) => (
-                    <span key={t} className="tag-pill">
-                      {t}
-                    </span>
-                  ))}
-                </div>
-              )}
+              <div className="post-meta">
+                <time dateTime={post.created_at}>{new Date(post.created_at).toLocaleDateString("en", { year: "numeric", month: "short", day: "numeric" })}</time>
+                {post.tags.map((t) => (
+                  <span key={t} className="tag-pill">
+                    {t}
+                  </span>
+                ))}
+              </div>
 
               {post.excerpt && (
                 <div className="post-content markdown-body">
                   <ReactMarkdown components={{ img: MarkdownImage }}>{post.excerpt}</ReactMarkdown>
                 </div>
               )}
-
-              <p className="post-date">{new Date(post.created_at).toLocaleDateString()}</p>
             </Link>
           </article>
         ))}
@@ -223,13 +218,3 @@ export default function Ideas() {
     </div>
   );
 }
-
-const styles: Record<string, React.CSSProperties> = {
-  link: {
-    color: "#6b7280",
-    textDecoration: "none",
-    fontWeight: 500,
-    transition: "color 0.2s",
-    cursor: "pointer",
-  },
-};

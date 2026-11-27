@@ -1,8 +1,21 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { FaGithub } from "react-icons/fa";
-import { FiCheck } from "react-icons/fi";
+import { FiArrowUpRight } from "react-icons/fi";
+import ReactMarkdown, { type Components } from "react-markdown";
 import GoogleAnalytics from "./googleAnalytics";
+import "./App.css";
+
+// README h1 repeats the card title; other headings shrink to card size; images skipped.
+const README_COMPONENTS: Components = {
+  h1: () => null,
+  h2: "h4",
+  h3: "h4",
+  h4: "h4",
+  h5: "h4",
+  h6: "h4",
+  img: () => null,
+};
 
 interface Project {
   name: string;
@@ -13,6 +26,55 @@ interface Project {
 }
 
 const GITHUB_USERNAME = "alexisnsns";
+
+interface ExperienceEntry {
+  role: string;
+  company: string;
+  link?: string;
+  note: string;
+  dates: string;
+}
+
+const EXPERIENCE: ExperienceEntry[] = [
+  {
+    role: "Senior Front-End Developer",
+    company: "T-RIZE",
+    link: "https://www.t-rize.io/",
+    note: "Real-world asset tokenization platform, Montréal",
+    dates: "Nov 2025 – now",
+  },
+  {
+    role: "Mobile & Full-Stack Developer",
+    company: "JOIN",
+    link: "https://getjoin.io/join-pro",
+    note: "Digital asset investment products, Montréal",
+    dates: "Dec 2023 – Nov 2025",
+  },
+  {
+    role: "Operations Manager",
+    company: "Flatsy",
+    note: "Proptech marketplace for property viewings, Paris",
+    dates: "Sep 2020 – Apr 2023",
+  },
+  {
+    role: "Global Expansion Lead",
+    company: "Plum Guide",
+    note: "Short-term rental marketplace, London",
+    dates: "Mar 2020 – Sep 2020",
+  },
+  {
+    role: "Marketplace Coordinator",
+    company: "Plum Guide",
+    note: "Paris",
+    dates: "Feb 2019 – Mar 2020",
+  },
+  {
+    role: "Venture Capital Analyst",
+    company: "LA Angels Society",
+    note: "Early-stage VC, São Paulo",
+    dates: "2017",
+  },
+];
 
 function App() {
   const [projects, setProjects] = useState<Project[]>([
@@ -112,316 +174,165 @@ function App() {
   return (
     <>
       <GoogleAnalytics trackingId="G-78JRS5F43L" />
-      <div style={styles.container} className="container">
-        <h1 style={styles.title}>Alex N</h1>
-
-        <p style={styles.subtitle}>Full-stack dev · Mostly TS/JS and Web3</p>
-        <hr
-          style={{
-            width: "60%",
-            border: "none",
-            borderTop: "1px solid #e2e8f0",
-          }}
-        />
-
-        <p style={styles.text}>
-          Currently working on{" "}
-          <a
-            style={styles.link}
-            href="https://x.com/trize_io?lang=en"
-            onMouseEnter={(e) => (e.currentTarget.style.color = "#4b5563")}
-            onMouseLeave={(e) => (e.currentTarget.style.color = "#6b7280")}
-            target="_blank"
-          >
-            @T-Rize
-          </a>{" "}
-          tokenization platform.
-        </p>
-        <p style={styles.text}>
-          Crafting free range, fair trade, organic software for DeFi teams.
-        </p>
-        <p style={styles.text}>Proud ETH node operator; going bankless.</p>
-        <div style={styles.links}>
-          <div
-            className="link-group"
-            style={{
-              display: "flex",
-              flexWrap: "wrap",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: "8px",
-              textAlign: "center",
-            }}
-          >
-            <a
-              style={{
-                ...styles.link,
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "6px",
-                cursor: "pointer",
-              }}
-              onMouseEnter={(e) => (e.currentTarget.style.color = "#4b5563")}
-              onMouseLeave={(e) => (e.currentTarget.style.color = "#6b7280")}
+      <main className="home">
+        <header className="masthead">
+          <h1 className="masthead-name">Alexis NS</h1>
+          <nav className="masthead-links" aria-label="Contact and links">
+            <button
+              type="button"
+              title="Copy email address"
               onClick={handleCopy}
             >
-              {copied ? (
-                <>
-                  <FiCheck size={16} strokeWidth={2} />
-                  Copied!
-                </>
-              ) : (
-                <>
-                  {/* 📋 Copy Icon */}
-                  {email}
-                </>
-              )}
-            </a>
-            ·
+              {copied ? "Copied" : email}
+            </button>
+            <Link to="/Ideas">Ideas</Link>
             <a
               href={`https://gitlab.com/${GITHUB_USERNAME}`}
               target="_blank"
-              style={styles.link}
-              onMouseEnter={(e) => (e.currentTarget.style.color = "#4b5563")}
-              onMouseLeave={(e) => (e.currentTarget.style.color = "#6b7280")}
+              rel="noopener noreferrer"
             >
               GitLab
             </a>
-            ·
             <a
               href={`https://github.com/${GITHUB_USERNAME}`}
               target="_blank"
-              style={styles.link}
-              onMouseEnter={(e) => (e.currentTarget.style.color = "#4b5563")}
-              onMouseLeave={(e) => (e.currentTarget.style.color = "#6b7280")}
+              rel="noopener noreferrer"
             >
               GitHub
             </a>
-            ·
-            <a
-              href="./resumeAlexN.pdf"
-              target="_blank"
-              rel="noopener noreferrer"
-              style={styles.link}
-              onMouseEnter={(e) => (e.currentTarget.style.color = "#4b5563")}
-              onMouseLeave={(e) => (e.currentTarget.style.color = "#6b7280")}
-            >
+            <a href="./resumeAlexN.pdf" target="_blank" rel="noopener noreferrer">
               Resume
             </a>
-          </div>
-        </div>
-        <hr
-          style={{
-            width: "60%",
-            border: "none",
-            borderTop: "1px solid #e2e8f0",
-            marginTop: "1rem",
-          }}
-        />
-        <h2>Day Work </h2>
-        <p style={{ ...styles.text, marginBottom: 5 }}>
-          Selected professional experience:
-        </p>
-        <ul style={{ ...styles.text, textAlign: "left", lineHeight: 1.5 }}>
-          <li>
-            <a
-              href="https://www.t-rize.io/"
-              target="_blank"
-              style={styles.link}
-            >
-              T-Rize
-            </a>
-            : Tokenization & RWA platform
-          </li>
-          <li>
-            <a
-              href="https://getjoin.io/join-pro"
-              target="_blank"
-              style={styles.link}
-            >
-              Join Pro
-            </a>
-            : Institutional DeFi savings & treasury platform
-          </li>
-          <li>
-            <a
-              href="https://apps.apple.com/us/app/join-wallet/id6590635145"
-              target="_blank"
-              style={styles.link}
-            >
-              Join Wallet
-            </a>
-            : Self-custodial MPC crypto wallet (iOS/Android)
-          </li>
-          <li>
-            <a
-              href="https://www.apeworx.io/"
-              target="_blank"
-              style={styles.link}
-            >
-              ApeWorx
-            </a>
-            : Open-source smart contract dev toolkit
-          </li>
-        </ul>
+          </nav>
+        </header>
 
-        <h2 style={{ marginTop: "" }}>Night Work</h2>
-        <div style={styles.projectGrid} className="project-grid">
-          {projects.map((p) => (
-            <div
-              key={p.name}
-              style={styles.projectCard}
-              className="project-card"
-            >
-              <h3>
-                {p.displayName}
-                <a
-                  href={
-                    p.name.toLowerCase() === "zenloop"
-                      ? "https://github.com/alexberthon/zenloop"
-                      : `https://github.com/${GITHUB_USERNAME}/${p.name}`
-                  }
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{
-                    ...styles.repoLink,
-                    marginLeft: 8, // small spacing between icons
-                  }}
-                >
-                  <FaGithub size={16} strokeWidth={2} />
-                </a>
-                {p.link && (
+        <div className="home-intro">
+          <p className="home-lead">
+            Seven years in startups, on <mark>both sides</mark> of the product.
+          </p>
+          <p className="home-role">
+            Senior Front-End Developer at T-RIZE, Montréal
+          </p>
+        </div>
+
+        <div className="home-prose">
+          <p>
+            I did a master's in economics and finance at Sciences Po, and in
+            2017 I worked in São Paulo as an analyst at LA Angels Society, an
+            early-stage VC fund, looking at startups from the outside.
+          </p>
+          <p>
+            In 2019 I went inside one. I joined Plum Guide in Paris to grow the
+            supply side of the marketplace, and owned acquisition for Paris, its
+            second-largest market. A year later I was promoted and moved to
+            London to lead acquisition and supply onboarding for the UK and the
+            US.
+          </p>
+          <p>
+            I then spent close to three years at Flatsy, back in Paris, running
+            operations for a field team of 100+ people across the region, with
+            four direct reports.
+          </p>
+          <p>
+            After that I retrained as a developer. At JOIN in Montréal I
+            launched the mobile app on iOS and Android, which reached $10M+ in
+            traded volume, and built the onboarding and KYC, the deposit and
+            withdrawal flows for institutional clients, and the dashboards the
+            team used to track usage.
+          </p>
+          <p>
+            Now I'm at T-RIZE, where I build the front end and also work on the
+            roadmap, UX and sprint planning. That's where the operations years
+            come in handy.
+          </p>
+          <p>
+            Along the way I've worked in France, the UK, the US, Brazil and
+            Canada, and I speak French, English, Spanish and Portuguese. Outside
+            work I run ultra-trails: QMT 80K and NOTOS 65K this year, and my
+            first 100K season in 2027. I also won Paris Startup Weekend in 2019.
+          </p>
+          <p>
+            I write about what I'm thinking through on the{" "}
+            <Link to="/Ideas">Ideas page</Link>.
+          </p>
+        </div>
+
+        <section className="home-section" aria-labelledby="experience">
+          <h2 id="experience">Experience</h2>
+          <ul className="home-timeline">
+            {EXPERIENCE.map((e) => (
+              <li key={e.role + e.company}>
+                <span>
+                  <span className="home-role-title">{e.role}</span>,{" "}
+                  {e.link ? (
+                    <a href={e.link} target="_blank" rel="noopener noreferrer">
+                      {e.company}
+                    </a>
+                  ) : (
+                    e.company
+                  )}
+                </span>
+                <span className="home-dates">{e.dates}</span>
+                <span className="home-note">{e.note}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+
+        <section className="home-section" aria-labelledby="open-source">
+          <h2 id="open-source">Open source</h2>
+          <div className="home-grid">
+            {projects.map((p) => (
+              <article key={p.name} className="home-card">
+                <h3>
+                  {p.displayName}
                   <a
-                    href={p.link}
+                    href={
+                      p.name.toLowerCase() === "zenloop"
+                        ? "https://github.com/alexberthon/zenloop"
+                        : `https://github.com/${GITHUB_USERNAME}/${p.name}`
+                    }
                     target="_blank"
                     rel="noopener noreferrer"
-                    style={{
-                      ...styles.repoLink,
-                      marginLeft: 4, // small spacing between icons
-                    }}
+                    aria-label={`${p.displayName} source on GitHub`}
                   >
-                    (launch ↗)
+                    <FaGithub size={15} />
                   </a>
-                )}
-              </h3>
-              <pre style={styles.readme}>
-                {p.readme ? p.readme.slice(0, 600) + "..." : "No Readme found."}
-              </pre>
-              <p> {p.comments}</p>
-            </div>
-          ))}
-        </div>
+                  {p.link && (
+                    <a href={p.link} target="_blank" rel="noopener noreferrer">
+                      Live
+                      <FiArrowUpRight size={14} aria-hidden="true" />
+                    </a>
+                  )}
+                </h3>
+                <div className="home-readme">
+                  {p.readme ? (
+                    <ReactMarkdown components={README_COMPONENTS}>
+                      {p.readme.slice(0, 600)}
+                    </ReactMarkdown>
+                  ) : (
+                    "No README found."
+                  )}
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
 
-        <hr
-          style={{
-            width: "60%",
-            border: "none",
-            borderTop: "1px solid #e2e8f0",
-            marginTop: "1rem",
-          }}
-        />
-        <h2 style={{ marginTop: "" }}>Things I'm exploring</h2>
-        <ul style={{ ...styles.text, textAlign: "left", lineHeight: 1.5 }}>
-          <li style={{ marginBottom: "1rem" }}>
-            Arbitrage bot: I had a small CEX/DEX arbitrage bot running while the
-            FTX API was still active. I had to sunset it when FTX went down. I'm
-            curious to launch it again, this time maybe arbitraging cross-chain
-            price differences, or wrapped tokens opportunities (such as
-            doge/cbDoge). Started playing with Paraswap SDK to log price
-            differences.
-          </li>
-          <li style={{ marginBottom: "1rem" }}>
-            Non-USD stablecoins and decentralized stablecoins
-          </li>
-          <li>
-            I share some of my ideas{" "}
-            <Link style={styles.link} to="/Ideas">
-              here
-            </Link>
-          </li>
-        </ul>
-        <hr
-          style={{
-            width: "60%",
-            border: "none",
-            borderTop: "1px solid #e2e8f0",
-          }}
-        />
-        <footer style={styles.footer}>
-          <p>
-            Feel free to re-use this basic Vite/TSX template for your own needs
-          </p>
+        <footer className="home-footer">
+          <p>Feel free to re-use this Vite/TSX template for your own needs.</p>
           <a
             href={`https://github.com/${GITHUB_USERNAME}/pfalexns`}
             target="_blank"
             rel="noopener noreferrer"
-            style={styles.repoLink}
+            aria-label="Source of this site on GitHub"
           >
-            <FaGithub size={16} strokeWidth={2} />
+            <FaGithub size={16} />
           </a>
         </footer>
-      </div>
+      </main>
     </>
   );
 }
-
-const styles: Record<string, React.CSSProperties> = {
-  container: {
-    fontFamily: "system-ui, sans-serif",
-    minHeight: "100vh",
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    backgroundColor: "#ffffff",
-    color: "#000000",
-    padding: "2rem",
-  },
-  title: { fontSize: "2.5rem", marginBottom: "0.5rem" },
-  subtitle: { fontSize: "1.2rem", opacity: 0.8, textAlign: "center" },
-  text: { maxWidth: 600, textAlign: "center" },
-  links: { display: "flex", gap: "1rem", marginTop: "1rem" },
-  link: {
-    color: "#6b7280",
-    textDecoration: "none",
-    fontWeight: 500,
-    transition: "color 0.2s",
-    cursor: "pointer",
-  },
-  projectCard: {
-    border: "1px solid #e2e8f0",
-    borderRadius: "12px",
-    padding: "1.5rem",
-    boxShadow: "0 2px 6px rgba(0,0,0,0.05)",
-  },
-  readme: {
-    backgroundColor: "#f8fafc",
-    borderRadius: "8px",
-    overflowX: "auto",
-    whiteSpace: "pre-wrap",
-    padding: "8px",
-  },
-  repoLink: {
-    display: "inline-flex",
-    alignItems: "center",
-    color: "black",
-    textDecoration: "none",
-    fontWeight: 500,
-    marginRight: 5,
-  },
-  footer: {
-    // marginTop: "1.5rem",
-    fontSize: "0.9rem",
-    opacity: 0.7,
-    textAlign: "center",
-  },
-  projectGrid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(350px, 1fr))",
-    gap: "1.5rem",
-    marginTop: "2rem",
-    maxWidth: "900px",
-    width: "100%",
-  },
-};
 
 export default App;

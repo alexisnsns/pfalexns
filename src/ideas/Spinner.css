@@ -13,8 +13,8 @@
 .spinner {
   width: 28px;
   height: 28px;
-  border: 3px solid #e5e7eb;
-  border-top-color: #374151;
+  border: 2px solid var(--rule);
+  border-top-color: var(--clay);
   border-radius: 50%;
   animation: spinner-rotate 0.65s linear infinite;
 }

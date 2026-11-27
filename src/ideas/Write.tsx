@@ -8,6 +8,7 @@ import {
   uploadImage,
 } from "../../lib/githubClient";
 import Login from "./Login";
+import Masthead from "../Masthead";
 import "./Ideas.css";
 import { useNavigate } from "react-router-dom";
 import MDEditor from "@uiw/react-md-editor";
@@ -82,18 +83,13 @@ export default function Write() {
 
   return (
     <div className="ideas-container">
-      <h1 className="ideas-title">Write a New Post</h1>
+      <Masthead>
+        <button type="button" onClick={() => clearPat()}>
+          Log out
+        </button>
+      </Masthead>
 
-      <div className="ideas-nav">
-        <a href="/#/Ideas" style={styles.link}>
-          /Ideas
-        </a>
-        <div className="links">
-          <span className="user-info">
-            <button onClick={() => clearPat()}>Logout</button>
-          </span>
-        </div>
-      </div>
+      <h1 className="ideas-title">New post</h1>
 
       <form onSubmit={(e) => e.preventDefault()} className="write-form">
         <input
@@ -141,7 +137,7 @@ export default function Write() {
 
         <div className="button-group">
           <label className="upload-button">
-            {busy === "image" ? "Uploading..." : "📸 Upload Image"}
+            {busy === "image" ? "Uploading..." : "Upload image"}
             <input
               type="file"
               accept="image/*"
@@ -177,13 +173,3 @@ export default function Write() {
     </div>
   );
 }
-
-const styles: Record<string, React.CSSProperties> = {
-  link: {
-    color: "#6b7280",
-    textDecoration: "none",
-    fontWeight: 500,
-    transition: "color 0.2s",
-    cursor: "pointer",
-  },
-};

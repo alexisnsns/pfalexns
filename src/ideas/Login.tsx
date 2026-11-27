@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { unlockWithPassphrase } from "../../lib/githubClient";
 import "./Ideas.css";
+import Masthead from "../Masthead";
 
 export default function Login() {
   const [passphrase, setPassphrase] = useState("");
@@ -25,6 +26,7 @@ export default function Login() {
 
   return (
     <div className="ideas-container">
+      <Masthead />
       <h1 className="ideas-title">Unlock</h1>
 
       <form onSubmit={handleUnlock} className="write-form">

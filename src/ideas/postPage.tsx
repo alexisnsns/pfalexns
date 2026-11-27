@@ -15,6 +15,7 @@ import {
 import { parseTagInput } from "../../lib/postTags";
 import Spinner from "./Spinner";
 import MarkdownImage from "./MarkdownImage";
+import Masthead from "../Masthead";
 
 export default function PostPage() {
   const { slug } = useParams<{ slug: string }>();
@@ -141,14 +142,26 @@ export default function PostPage() {
     }
   }
 
-  if (loading) return <Spinner label="Loading post" page />;
-  if (!post) return <p>Post not found.</p>;
+  if (loading)
+    return (
+      <div className="ideas-container">
+        <Masthead />
+        <Spinner label="Loading post" page />
+      </div>
+    );
+  if (!post)
+    return (
+      <div className="ideas-container">
+        <Masthead />
+        <p className="ideas-empty">
+          Post not found. <Link to="/Ideas">See all ideas</Link>.
+        </p>
+      </div>
+    );
 
   return (
     <div className="ideas-container">
-      <Link style={styles.link} to="/Ideas">
-        ← Back to Ideas
-      </Link>
+      <Masthead />
 
       {isEditing ? (
         <>
@@ -178,7 +191,7 @@ export default function PostPage() {
 
           <div className="edit-buttons">
             <label className="upload-button">
-              {busy === "image" ? "Uploading..." : "📸 Upload Image"}
+              {busy === "image" ? "Uploading..." : "Upload image"}
               <input
                 type="file"
                 accept="image/*"
@@ -203,10 +216,12 @@ export default function PostPage() {
         </>
       ) : (
         <>
-          <h1>{post.title}</h1>
-          {isDraft && !post.private && <span className="draft-tag">[Draft]</span>}
-          {post.private && <span className="private-tag">[Private]</span>}
-          <p>{new Date(post.created_at).toLocaleDateString()}</p>
+          <h1 className="post-page-title">{post.title}</h1>
+          <p className="post-page-meta">
+            <time dateTime={post.created_at}>{new Date(post.created_at).toLocaleDateString("en", { year: "numeric", month: "short", day: "numeric" })}</time>
+            {isDraft && !post.private && <span className="draft-tag">Draft</span>}
+            {post.private && <span className="private-tag">Private</span>}
+          </p>
           {post.tags.length > 0 && (
             <div className="post-tags post-tags--detail" aria-label="Tags">
               {post.tags.map((t) => (
@@ -284,13 +299,3 @@ export default function PostPage() {
     </div>
   );
 }
-
-const styles: Record<string, React.CSSProperties> = {
-  link: {
-    color: "#6b7280",
-    textDecoration: "none",
-    fontWeight: 500,
-    transition: "color 0.2s",
-    cursor: "pointer",
-  },
-};
