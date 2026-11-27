@@ -33,12 +33,13 @@ interface ExperienceEntry {
   link?: string;
   note: string;
   dates: string;
+  previous?: { role: string; note: string; dates: string };
 }
 
 const EXPERIENCE: ExperienceEntry[] = [
   {
     role: "Senior Front-End Developer",
-    company: "T-RIZE",
+    company: "t-rize.io",
     link: "https://www.t-rize.io/",
     note: "Real-world asset tokenization platform, Montréal",
     dates: "Nov 2025 – now",
@@ -46,27 +47,28 @@ const EXPERIENCE: ExperienceEntry[] = [
   {
     role: "Mobile & Full-Stack Developer",
     company: "JOIN",
-    link: "https://getjoin.io/join-pro",
-    note: "Digital asset investment products, Montréal",
-    dates: "Dec 2023 – Nov 2025",
+    link: "https://x.com/getjoin_io",
+    note: "Digital asset investment products, CT, USA then Montréal",
+    dates: "Apr 2023 – Nov 2025",
   },
   {
     role: "Operations Manager",
-    company: "Flatsy",
+    company: "flatsy.fr",
+    link: "https://www.flatsy.fr/",
     note: "Proptech marketplace for property viewings, Paris",
     dates: "Sep 2020 – Apr 2023",
   },
   {
     role: "Global Expansion Lead",
-    company: "Plum Guide",
+    company: "plumguide.com",
+    link: "https://www.plumguide.com/",
     note: "Short-term rental marketplace, London",
     dates: "Mar 2020 – Sep 2020",
-  },
-  {
-    role: "Marketplace Coordinator",
-    company: "Plum Guide",
-    note: "Paris",
-    dates: "Feb 2019 – Mar 2020",
+    previous: {
+      role: "Marketplace Coordinator",
+      note: "Paris",
+      dates: "Feb 2019 – Mar 2020",
+    },
   },
   {
     role: "Venture Capital Analyst",
@@ -208,7 +210,7 @@ function App() {
 
         <div className="home-intro">
           <p className="home-lead">
-            Seven years in startups, on <mark>both sides</mark> of the product.
+            7+ years in startups, across <mark>operations and product engineering</mark>
           </p>
           <p className="home-role">
             Senior Front-End Developer at T-RIZE, Montréal
@@ -217,39 +219,43 @@ function App() {
 
         <div className="home-prose">
           <p>
-            I did a master's in economics and finance at Sciences Po, and in
-            2017 I worked in São Paulo as an analyst at LA Angels Society, an
-            early-stage VC fund, looking at startups from the outside.
+            I started in operations at marketplace startups. At{" "}
+            <a href="https://www.plumguide.com/" target="_blank" rel="noopener noreferrer">
+              plumguide.com
+            </a>
+            , a holiday-rental marketplace, I ran acquisition for the Paris
+            market, then moved to London in 2020 to work on the UK and US
+            markets. At{" "}
+            <a href="https://www.flatsy.fr/" target="_blank" rel="noopener noreferrer">
+              flatsy.fr
+            </a>{" "}
+            I ran a field
+            team of more than a hundred people across Paris, with four people
+            helping me run the day to day.
           </p>
           <p>
-            In 2019 I went inside one. I joined Plum Guide in Paris to grow the
-            supply side of the marketplace, and owned acquisition for Paris, its
-            second-largest market. A year later I was promoted and moved to
-            London to lead acquisition and supply onboarding for the UK and the
-            US.
+            I'd been building things on the side for a while, and in 2023 I made the switch to engineering full time. At{" "}
+            <a href="https://x.com/getjoin_io" target="_blank" rel="noopener noreferrer">
+              JOIN
+            </a>{" "}
+            I helped build and launch
+            a mobile app for managing digital assets, then the deposit and
+            withdrawal flows for its institutional clients. Now I'm at{" "}
+            <a href="https://www.t-rize.io/" target="_blank" rel="noopener noreferrer">
+              t-rize.io
+            </a>
+            , where I write the front end and have started taking on product work:
+            the roadmap, specs and sprint planning.
           </p>
           <p>
-            I then spent close to three years at Flatsy, back in Paris, running
-            operations for a field team of 100+ people across the region, with
-            four direct reports.
+            I studied Economics and Finance at Sciences Po, with a stint as an
+            analyst at an early-stage VC fund in São Paulo. I speak French,
+            English, Spanish and Portuguese, and I've worked in France, the UK,
+            the US, Brazil and Canada.
           </p>
           <p>
-            After that I retrained as a developer. At JOIN in Montréal I
-            launched the mobile app on iOS and Android, which reached $10M+ in
-            traded volume, and built the onboarding and KYC, the deposit and
-            withdrawal flows for institutional clients, and the dashboards the
-            team used to track usage.
-          </p>
-          <p>
-            Now I'm at T-RIZE, where I build the front end and also work on the
-            roadmap, UX and sprint planning. That's where the operations years
-            come in handy.
-          </p>
-          <p>
-            Along the way I've worked in France, the UK, the US, Brazil and
-            Canada, and I speak French, English, Spanish and Portuguese. Outside
-            work I run ultra-trails: QMT 80K and NOTOS 65K this year, and my
-            first 100K season in 2027. I also won Paris Startup Weekend in 2019.
+            Outside work, I love running, mostly trail, and lately longer and
+            longer: I've started dabbling in ultra-distances.
           </p>
           <p>
             I write about what I'm thinking through on the{" "}
@@ -274,6 +280,16 @@ function App() {
                 </span>
                 <span className="home-dates">{e.dates}</span>
                 <span className="home-note">{e.note}</span>
+                {e.previous && (
+                  <div className="home-previous">
+                    <span className="home-previous-label">
+                      Previously at {e.company}
+                    </span>
+                    <span className="home-role-title">{e.previous.role}</span>
+                    <span className="home-dates">{e.previous.dates}</span>
+                    <span className="home-note">{e.previous.note}</span>
+                  </div>
+                )}
               </li>
             ))}
           </ul>
@@ -284,8 +300,17 @@ function App() {
           <div className="home-grid">
             {projects.map((p) => (
               <article key={p.name} className="home-card">
-                <h3>
-                  {p.displayName}
+                <h3>{p.displayName}</h3>
+                <div className="home-readme">
+                  {p.readme ? (
+                    <ReactMarkdown components={README_COMPONENTS}>
+                      {p.readme.slice(0, 600)}
+                    </ReactMarkdown>
+                  ) : (
+                    "No README found."
+                  )}
+                </div>
+                <div className="home-card-links">
                   <a
                     href={
                       p.name.toLowerCase() === "zenloop"
@@ -294,24 +319,21 @@ function App() {
                     }
                     target="_blank"
                     rel="noopener noreferrer"
-                    aria-label={`${p.displayName} source on GitHub`}
+                    aria-label={`${p.displayName} source code`}
                   >
-                    <FaGithub size={15} />
+                    Source
+                    <FiArrowUpRight size={13} aria-hidden="true" />
                   </a>
                   {p.link && (
-                    <a href={p.link} target="_blank" rel="noopener noreferrer">
-                      Live
-                      <FiArrowUpRight size={14} aria-hidden="true" />
+                    <a
+                      href={p.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={`${p.displayName} live site`}
+                    >
+                      Live site
+                      <FiArrowUpRight size={13} aria-hidden="true" />
                     </a>
-                  )}
-                </h3>
-                <div className="home-readme">
-                  {p.readme ? (
-                    <ReactMarkdown components={README_COMPONENTS}>
-                      {p.readme.slice(0, 600)}
-                    </ReactMarkdown>
-                  ) : (
-                    "No README found."
                   )}
                 </div>
               </article>
